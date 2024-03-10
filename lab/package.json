@@ -40,5 +40,7 @@
     "o1js": "^0.16.2"
   },
   "dependencies": {
+    "@ethereumjs/util": "^9.0.3",
+    "web3": "^4.6.0"
   }
 }
