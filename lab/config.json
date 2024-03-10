@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "deployAliases": {
+    "where": {
+      "url": "https://proxy.berkeley.minaexplorer.com/graphql",
+      "keyPath": "keys/where.json",
+      "feepayerKeyPath": "/Users/apple/.cache/zkapp-cli/keys/feepayer.json",
+      "feepayerAlias": "feepayer",
+      "fee": "0.1",
+      "smartContract": "WhereZkApp"
+    },
+    "where2": {
+      "url": "https://proxy.berkeley.minaexplorer.com/graphql",
+      "keyPath": "keys/where2.json",
+      "feepayerKeyPath": "/Users/apple/.cache/zkapp-cli/keys/feepayer.json",
+      "feepayerAlias": "feepayer",
+      "fee": "0.1",
+      "smartContract": "WhereZkApp"
+    }
+  }
+}
