@@ -21,6 +21,18 @@ npm run build
 node build/src/ownership.run.js
 ```
 
+### Proof of inclusion / membership
+
+as part of Mina-anons, users need to anonymously prove membership of certain groups
+
+MerkleTree with persistence (levelDB) is utilized
+
+```sh
+npm install
+npm run build
+node build/src/inclusion.run.js
+```
+
 
 ## References and tools
 - https://toolkit.abdk.consulting/ethereum#recover-address,key-to-address
