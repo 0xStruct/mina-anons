@@ -6,11 +6,18 @@ import {
     MerkleWitness,
     Keccak,
     Poseidon,
+    Provable
   } from "o1js";
+  import { ProvableMerkleTreeUtils } from './lib/merkle/verify_circuit.js';
+  import { BaseMerkleProof } from './lib/merkle/proofs.js';
+
   
-  export { verifyInclusionProgram, MyMerkleWitness, Bytes64 };
+
+
+  export { verifyInclusionProgram, MerkleProof, Bytes64 };
   
-  class MyMerkleWitness extends MerkleWitness(8) {}
+  class MerkleProof extends ProvableMerkleTreeUtils.MerkleProof(8) {}
+
   class Bytes64 extends Bytes(64) {}  
   
   const verifyInclusionProgram = ZkProgram({
@@ -20,18 +27,26 @@ import {
   
     methods: {
       verifyInclusion: {
-        privateInputs: [MyMerkleWitness, Bytes64.provable],
-        method(merkleRoot: Field, witness: MyMerkleWitness, bytesOfXY: Bytes64) {
+        privateInputs: [MerkleProof, Field, Bytes64.provable],
+        method(merkleRoot: Field, merkleProof: MerkleProof, merkleIndex: Field, bytesOfXY: Bytes64) {
 
             const ethAddressFields = Keccak.ethereum(bytesOfXY).toFields().slice(12); // take only the last 20
 
             // check for inclusion
-            witness.calculateRoot(Poseidon.hash(ethAddressFields)).assertEquals(merkleRoot);
+            const leafHash = Poseidon.hash(ethAddressFields);
+
+            let isOk = ProvableMerkleTreeUtils.checkMembership(
+                merkleProof,
+                merkleRoot,
+                merkleIndex,
+                leafHash,
+                Field
+              );
             
             // ownership of address needs to be verified further
             // this is done in ownership.ts
   
-            return Bool(true);
+            return isOk;
         },
       },
     },

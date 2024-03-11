@@ -25,7 +25,10 @@ node build/src/ownership.run.js
 
 as part of Mina-anons, users need to anonymously prove membership of certain groups
 
-MerkleTree with persistence (levelDB) is utilized
+MerkleTree with persistence (levelDB) is utilized (ref: https://github.com/plus3-labs/o1js-merkle)
+
+`db` folder contains levelDB files for persistence, Merkle Tree is loaded from the existing DB if it is there already
+otherwise, a fresh DB is initiated
 
 ```sh
 npm install
