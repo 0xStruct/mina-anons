@@ -79,9 +79,11 @@ const verifyOwnershipInclusionProgram = ZkProgram({
           bytesOfXY.bytes[32].value
         );
 
+        // Provable.log("check publicKey (in bytes) vs publicKey (in curve) done");
+
         // check for inclusion
         const leafHash = Poseidon.hash(ethAddressFields);
-        Provable.log("leafHash", leafHash);
+        // Provable.log("leafHash", leafHash);
 
         ProvableMerkleTreeUtils.checkMembership(
           merkleProof,
@@ -89,9 +91,9 @@ const verifyOwnershipInclusionProgram = ZkProgram({
           merkleIndex,
           leafHash,
           Field
-        ).assertTrue();
+        ).assertTrue('checkMembership failed');
 
-        Provable.log("checkMembership done");
+        // Provable.log("checkMembership done");
 
         // verify signature - ownership
         return signature.verifySignedHash(message, publicKey);

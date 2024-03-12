@@ -3,7 +3,6 @@ import {
   Secp256k1,
   Ecdsa,
   Scalar,
-  MerkleProof,
   Bytes64,
 } from './ownership-inclusion.js';
 import { Gadgets, Poseidon, Keccak, Field, Bytes } from 'o1js';
@@ -14,59 +13,53 @@ import { MerkleTree } from './lib/merkle/merkle_tree.js';
 import { Level } from 'level';
 import { LevelStore } from './lib/store/level_store.js';
 
-import * as ethjsUtil from '@ethereumjs/util';
-import Web3 from 'web3';
-const web3 = new Web3(/* PROVIDER */);
+import { hashMessage, recoverPublicKey } from 'viem';
+import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
 
-// create an account with web3.js
-let account = web3.eth.accounts.create();
-console.log('account', account);
+// create accounts with viem
+let accounts = [
+  privateKeyToAccount(generatePrivateKey()),
+  privateKeyToAccount(generatePrivateKey()),
+  privateKeyToAccount(generatePrivateKey()),
+  privateKeyToAccount(generatePrivateKey()),
+  privateKeyToAccount(generatePrivateKey()),
+];
 
-console.log('=== sign with web3.js');
+console.log('=== sign with viem');
 const message = 'hello';
-const web3SignedMessage = web3.eth.accounts.sign(message, account.privateKey);
+console.log('messageHash', message, hashMessage(message));
 
-console.log('hashMessage', web3.eth.accounts.hashMessage(message));
-console.log('web3SignedMessage', web3SignedMessage);
+const signature0 = await accounts[0].signMessage({ message });
+console.log('signature0', signature0);
 
-let sig3 = web3SignedMessage;
-console.log(
-  'web3 recover',
-  web3.eth.accounts.recover(message, sig3.v, sig3.r, sig3.s)
-);
+const publicKeyHex = await recoverPublicKey({
+  hash: hashMessage(message),
+  signature: signature0,
+});
 
-const publicKey = ethjsUtil.ecrecover(
-  ethjsUtil.hexToBytes(sig3.messageHash),
-  BigInt(sig3.v),
-  ethjsUtil.hexToBytes(sig3.r),
-  ethjsUtil.hexToBytes(sig3.s)
-);
+console.log('recovered public key', publicKeyHex);
 
-const publicKeyHex = ethjsUtil.bytesToHex(publicKey);
-console.log('Recovered public key', publicKeyHex);
-
-// const ethereumAddressFields = Keccak.ethereum(Bytes.fromHex(publicKeyHex.substring(2))).toFields().slice(12);
+// const ethereumAddressFields = Keccak.ethereum(Bytes.fromHex(publicKeyHex.substring(4))).toFields().slice(12);
 
 type Point = { x: Gadgets.Field3; y: Gadgets.Field3 };
 
 // publicKeyPoint is derived from X and Y point of the publickey which can be recovered from signature
 // its format is 0x + X + Y
-console.log('X', publicKeyHex.substring(2, 66));
-console.log('Y', publicKeyHex.substring(66));
+console.log('publicKey X, Y', publicKeyHex.substring(4, 68), publicKeyHex.substring(68));
 
 let publicKeyPoint: Point = {
-  x: Gadgets.Field3.from(BigInt('0x' + publicKeyHex.substring(2, 66))),
-  y: Gadgets.Field3.from(BigInt('0x' + publicKeyHex.substring(66, 130))),
+  x: Gadgets.Field3.from(BigInt('0x' + publicKeyHex.substring(4, 68))),
+  y: Gadgets.Field3.from(BigInt('0x' + publicKeyHex.substring(68))),
 };
 
 // publicKey: 0x + X + Y
-let bytesOfXY = Bytes64.fromHex(publicKeyHex.substring(2));
+let bytesOfXY = Bytes64.fromHex(publicKeyHex.substring(4));
 
-let signature = Ecdsa.fromHex(web3SignedMessage.signature);
-let msgHash = Scalar.from(BigInt(web3SignedMessage.messageHash));
+let signature = Ecdsa.fromHex(signature0);
+let msgHash = Scalar.from(BigInt(hashMessage(message)));
 let publicKeyCurve = Secp256k1.from(publicKeyPoint);
 
-console.log('###');
+console.log('=== merkletree and leveldb');
 
 // [remove for actual use]
 // clean the './db' folder as dynamic keypair is used for each run
@@ -81,20 +74,15 @@ let store: LevelStore<Field> = new LevelStore<Field>(
   'inclusionSet'
 );
 
-// hash is derived from publicKey point
-let hash0 = Poseidon.hash(Keccak.ethereum(bytesOfXY).toFields().slice(12));
-console.log("hash0", hash0);
-
-// hash is derived from eth addresses without 0x prefix
-let hash1 = Poseidon.hash(
-  Bytes.fromHex('AB3Dc529EF147414288f65ee7E166407B165b483').toFields()
-);
-let hash2 = Poseidon.hash(
-  Bytes.fromHex('05912fD7D55a7f604c6080CAc5F86982eC199136').toFields()
-);
-let hash3 = Poseidon.hash(
-  Bytes.fromHex('4C09CEDa6641d7036F6C6B6525068Dad5e8a2937').toFields()
-);
+// hash can be derived from publicKey point
+// and hash can also be derived from eth addresses without 0x prefix
+let accountHashes = [
+  Poseidon.hash(Keccak.ethereum(bytesOfXY).toFields().slice(12)),
+  Poseidon.hash(Bytes.fromHex(accounts[1].address.substring(2)).toFields()),
+  Poseidon.hash(Bytes.fromHex(accounts[2].address.substring(2)).toFields()),
+  Poseidon.hash(Bytes.fromHex(accounts[3].address.substring(2)).toFields()),
+  Poseidon.hash(Bytes.fromHex(accounts[4].address.substring(2)).toFields()),
+];
 
 // build or load MerkleTree
 let tree: MerkleTree<Field>;
@@ -108,10 +96,10 @@ try {
   console.log('leveldb is not there, building tree ...');
   tree = await MerkleTree.build<Field>(store, 8, Field);
 
-  await tree.update(0n, hash0);
-  await tree.update(1n, hash1);
-  await tree.update(2n, hash2);
-  await tree.update(3n, hash3);
+  await tree.update(0n, accountHashes[0]);
+  await tree.update(1n, accountHashes[1]);
+  await tree.update(2n, accountHashes[2]);
+  await tree.update(3n, accountHashes[3]);
 }
 
 console.log('tree.getRoot', tree.getRoot().toString());
@@ -126,9 +114,9 @@ let merkleIndex = Field(0n);
 
 // investigate the constraint system generated by ECDSA verify
 
-console.time('ecdsa verify only (build constraint system)');
+console.time('verify ownership + inclusion (build constraint system)');
 let program = await verifyOwnershipInclusionProgram.analyzeMethods();
-console.timeEnd('ecdsa verify only (build constraint system)');
+console.timeEnd('verify ownership + inclusion (build constraint system)');
 console.log(program.verifyOwnershipInclusion.summary());
 
 // compile and prove

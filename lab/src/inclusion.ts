@@ -3,10 +3,8 @@ import {
     Bool,
     Field,
     Bytes,
-    MerkleWitness,
     Keccak,
     Poseidon,
-    Provable
   } from "o1js";
   import { ProvableMerkleTreeUtils } from './lib/merkle/verify_circuit.js';
 

@@ -55,6 +55,14 @@ npm run build
 node build/src/ownership-inclusion.run.js
 ```
 
+test file `ownership-inclusion.test.ts` is available now
+
+```sh
+npm install
+npm run build
+npm run test
+```
+
 
 
 
