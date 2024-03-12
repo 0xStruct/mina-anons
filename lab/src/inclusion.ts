@@ -9,15 +9,10 @@ import {
     Provable
   } from "o1js";
   import { ProvableMerkleTreeUtils } from './lib/merkle/verify_circuit.js';
-  import { BaseMerkleProof } from './lib/merkle/proofs.js';
-
-  
-
 
   export { verifyInclusionProgram, MerkleProof, Bytes64 };
   
   class MerkleProof extends ProvableMerkleTreeUtils.MerkleProof(8) {}
-
   class Bytes64 extends Bytes(64) {}  
   
   const verifyInclusionProgram = ZkProgram({

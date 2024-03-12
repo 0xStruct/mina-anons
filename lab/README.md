@@ -36,6 +36,27 @@ npm run build
 node build/src/inclusion.run.js
 ```
 
+### Proof of ownership + inclusion
+
+to prove anonymously that a user not only own an ethereum address but also the address is a member of among addresses
+
+Ethereum adress is not the publicKey but is the last 20 characters of Keccak hash of the publicKey
+publicKey can be derived only from the privateKey or from the signature
+
+following checks are done
+- ethereum address is a member
+- derived address from publicKey (in bytes) is equal to the ethereum address
+- verify publicKey (in ForeignCurve) and signature
+- check publicKey (in bytes) vs publicKey (in ForeignCurve)
+
+```sh
+npm install
+npm run build
+node build/src/ownership-inclusion.run.js
+```
+
+
+
 
 ## References and tools
 - https://toolkit.abdk.consulting/ethereum#recover-address,key-to-address
