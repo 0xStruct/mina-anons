@@ -8,7 +8,7 @@ import {
   recoverMessageAddress,
   PrivateKeyAccount,
 } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+import { PRIVATE_KEYS, ACCOUNTS } from "@/config";
 
 function App() {
   const [account, setAccount] = useState<PrivateKeyAccount | null>(null);
@@ -16,29 +16,12 @@ function App() {
   const [signature, setSignature] = useState<`0x${string}` | undefined>();
   const [message, setMessage] = useState<string>("hello");
   const [merkle, setMerkle] = useState<any | null>(null);
+  const [proof, setProof] = useState<string | null>(null);
   const [recoveredAddress, setRecoveredAddress] = useState<
     `0x${string}` | undefined
   >();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-
-  // these a throw-away privateKeys, generated randomly
-  const PRIVATE_KEYS: `0x${string}`[] = [
-    "0x23a6856c2506f416cd3d8c2383cd13550b497490265bafabec57917575637846",
-    "0x42aa063351f5aedcc3a1fe9c5167e41ec6e33c3826a53ea62567c8bae3089836",
-    "0x5785b8988f3b496a9844da71197dc9a641e865edcb5d975908102dc67058d8bd",
-    "0xd76db099c34f31a1a363c671dbecea425e42326361e25ea5bb31beb84400cec3",
-    "0x9342f63dc524e79ac5624aae5992ec515c8083b1d3e923521254d52203166b72",
-  ];
-
-  // create accounts with viem
-  let accounts = [
-    privateKeyToAccount(PRIVATE_KEYS[0]),
-    privateKeyToAccount(PRIVATE_KEYS[1]),
-    privateKeyToAccount(PRIVATE_KEYS[2]),
-    privateKeyToAccount(PRIVATE_KEYS[3]),
-    privateKeyToAccount(PRIVATE_KEYS[4]),
-  ];
 
   const reset = () => {
     setStep(1);
@@ -48,7 +31,7 @@ function App() {
 
   const mockConnect = (i: number) => {
     setAccountIndex(i);
-    setAccount(accounts[i]);
+    setAccount(ACCOUNTS[i]);
     reset();
   };
 
@@ -59,6 +42,8 @@ function App() {
   };
 
   const doSignMessage = async () => {
+    setIsLoading(true);
+
     let sig = await account?.signMessage({ message });
 
     setSignature(sig);
@@ -77,6 +62,8 @@ function App() {
     let res = await response.json();
 
     setMerkle(res);
+
+    setIsLoading(false);
 
     setStep(2);
   };
@@ -106,12 +93,12 @@ function App() {
     console.log("/api/proof response", res);
 
     setIsLoading(false);
-
+    setProof(res);
     setStep(3);
   };
 
   return (
-    <div className="container px-8">
+    <div className="container max-w-4xl mx-auto">
       {account !== null && (
         <div className="w-full pt-4 pb-2">
           <div className="float-left p-0">
@@ -155,7 +142,7 @@ function App() {
             tabIndex={0}
             className="menu dropdown-content box z-50 w-52 bg-base-300 p-1 shadow"
           >
-            {accounts.map((acc, i) => (
+            {ACCOUNTS.map((acc, i) => (
               <li key={i}>
                 <a className="font-mono" key={i} onClick={() => mockConnect(i)}>
                   {acc.address.substring(0, 16)}
@@ -201,9 +188,15 @@ function App() {
             <button
               className="btn btn-primary btn-wide my-4"
               onClick={() => doSignMessage()}
-              disabled={account === null || message.length === 0}
+              disabled={account === null || message.length === 0 || isLoading}
             >
-              Sign Message
+              {isLoading ? (
+                <>
+                  <span className="loading loading-spinner"></span>Signing ...
+                </>
+              ) : (
+                "Sign Message"
+              )}
             </button>
           </>
         )}
@@ -234,18 +227,18 @@ function App() {
                 "Generate Proof"
               )}
             </button>
-            {isLoading &&(
+            {isLoading && (
               <div role="alert" className="alert alert-info text-xs">
-              <span>
-                ⏳ Proving process involves compling of ZkProgram and actual
-                proving
-                <br />
-                ⏱ it takes a couple of minutes
-                <br />
-                🤐 As the whole process is happening on your computer, your
-                privacy is preserved
-              </span>
-            </div>
+                <span>
+                  ⏳ Proving process involves compling of ZkProgram and actual
+                  proving
+                  <br />
+                  ⏱ it takes a couple of minutes
+                  <br />
+                  🤐 As the whole process is happening on your computer, your
+                  privacy is preserved
+                </span>
+              </div>
             )}
           </>
         )}
@@ -260,36 +253,35 @@ function App() {
                 feed.
               </span>
             </div>
-            <button className="btn btn-primary btn-wide my-4">Post Proof</button>
+            <button className="btn btn-primary btn-wide my-4">
+              Post Proof
+            </button>
           </>
         )}
 
         {recoveredAddress && (
-          <>
-            <div className="alert text-xs">
-              <span>
-                Recovered Address: {recoveredAddress} <br />
-                Signature:{" "}
-                {signature?.substring(0, 10) +
-                  " ... " +
-                  signature?.substring(122)}
-              </span>
-            </div>
-          </>
+          <div className="alert text-xs mt-4">
+            <span>
+              Recovered Address: {recoveredAddress} <br />
+              Signature:{" "}
+              {signature?.substring(0, 10) +
+                " ... " +
+                signature?.substring(122)}
+            </span>
+          </div>
         )}
 
         {step > 1 && merkle && (
-          <>
-            <div className="alert text-xs">
-              <span>
-                Merkle Root: {merkle?.merkleProofJSON.root} <br />
-                Merkle Proof Index: {accountIndex}
-                <br />
-                Merkle Proof:{" "}
-                {JSON.stringify(merkle?.merkleProofJSON).substring(0, 96)} ...
-              </span>
-            </div>
-          </>
+          <div className="alert text-xs mt-4">
+            <span>
+              Merkle Root: {merkle?.merkleProofJSON.root.substring(0, 40)}{" "}
+              <br />
+              Merkle Proof Index: {accountIndex}
+              <br />
+              Merkle Proof:{" "}
+              {JSON.stringify(merkle?.merkleProofJSON).substring(0, 60)} ...
+            </span>
+          </div>
         )}
       </div>
     </div>

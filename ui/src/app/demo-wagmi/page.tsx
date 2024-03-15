@@ -12,6 +12,7 @@ function App() {
   const [signature, setSignature] = useState<`0x${string}` | undefined>();
   const [message, setMessage] = useState<string>("hello");
   const [merkle, setMerkle] = useState<any | null>(null);
+  const [proof, setProof] = useState<string | null>(null);
   const [recoveredAddress, setRecoveredAddress] = useState("");
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -82,12 +83,12 @@ function App() {
     console.log("/api/proof response", res);
 
     setIsLoading(false);
-
+    setProof(res);
     setStep(3);
   };
 
   return (
-    <div className="container px-8">
+    <div className="container max-w-4xl mx-auto">
       {account.status === "connected" && (
         <div className="w-full pt-4 pb-2">
           <div className="float-left">
@@ -227,18 +228,18 @@ function App() {
                 "Generate Proof"
               )}
             </button>
-            {isPending &&(
+            {isPending && (
               <div role="alert" className="alert alert-info text-xs">
-              <span>
-                ⏳ Proving process involves compling of ZkProgram and actual
-                proving
-                <br />
-                ⏱ it takes a couple of minutes
-                <br />
-                🤐 As the whole process is happening on your computer, your
-                privacy is preserved
-              </span>
-            </div>
+                <span>
+                  ⏳ Proving process involves compling of ZkProgram and actual
+                  proving
+                  <br />
+                  ⏱ it takes a couple of minutes
+                  <br />
+                  🤐 As the whole process is happening on your computer, your
+                  privacy is preserved
+                </span>
+              </div>
             )}
           </>
         )}
@@ -261,37 +262,34 @@ function App() {
         )}
 
         {recoveredAddress && (
-          <>
-            <div className="alert text-xs">
-              <span>
-                Recovered Address: {recoveredAddress} <br />
-                Signature:{" "}
-                {signMessageData?.substring(0, 8) +
-                  " ... " +
-                  signMessageData?.substring(124)}
-              </span>
-            </div>
-          </>
+          <div className="alert text-xs mt-4">
+            <span>
+              Recovered Address: {recoveredAddress} <br />
+              Signature:{" "}
+              {signMessageData?.substring(0, 8) +
+                " ... " +
+                signMessageData?.substring(124)}
+            </span>
+          </div>
         )}
 
         {errorSign && (
-          <div className="alert alert-error text-xs">
+          <div className="alert alert-error text-xs mt-4">
             <span>{errorSign.message}</span>
           </div>
         )}
 
         {step > 1 && merkle && (
-          <>
-            <div className="alert text-xs">
-              <span>
-                Merkle Root: {merkle?.merkleProofJSON.root} <br />
-                Merkle Proof Index: 0
-                <br />
-                Merkle Proof:{" "}
-                {JSON.stringify(merkle?.merkleProofJSON).substring(0, 96)} ...
-              </span>
-            </div>
-          </>
+          <div className="alert text-xs mt-4">
+            <span>
+              Merkle Root: {merkle?.merkleProofJSON.root.substring(0, 40)} ...{" "}
+              <br />
+              Merkle Proof Index: 0
+              <br />
+              Merkle Proof:{" "}
+              {JSON.stringify(merkle?.merkleProofJSON).substring(0, 60)} ...
+            </span>
+          </div>
         )}
       </div>
     </div>

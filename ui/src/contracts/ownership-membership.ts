@@ -34,28 +34,31 @@ export class PublicOutput extends Struct({
   verifiedOwnership: Bool,
   verifiedMembership: Bool,
   merkleRoot: Field,
+  messageHashHash: Field,
 }) {}
 
 const verifyOwnershipMembershipProgram = ZkProgram({
   name: 'ownership-membership-program',
-  publicInput: Scalar.provable,
+  publicInput: Field,
   publicOutput: PublicOutput,
 
   methods: {
     verifyOwnershipInclusion: {
       privateInputs: [
+        Scalar.provable,
+        Field,
         Ecdsa.provable,
         Secp256k1.provable,
-        Field,
         MerkleProof,
         Field,
         Bytes64.provable,
       ],
       method(
-        message: Scalar,
+        merkleRoot: Field,
+        messageHashScalar: Scalar,
+        messageHashHash: Field,
         signature: Ecdsa,
         publicKey: Secp256k1,
-        merkleRoot: Field,
         merkleProof: MerkleProof,
         merkleIndex: Field,
         bytesOfXY: Bytes64
@@ -65,6 +68,8 @@ const verifyOwnershipMembershipProgram = ZkProgram({
           .toFields()
           .slice(12); // take only the last 20
 
+        // assert to assure messageHashHash is equal to messageHashScalar which is used for verification
+        messageHashHash.assertEquals(Poseidon.hash(messageHashScalar.toFields()));
 
         // check that bytes of X and Y are equal to those from publicKey.x publicKey.y
         // 32 bytes, 256 bits
@@ -101,13 +106,14 @@ const verifyOwnershipMembershipProgram = ZkProgram({
           Field
         ); //.assertTrue('checkMembership failed');
 
-        const verifiedOwnership = signature.verifySignedHash(message, publicKey);
+        const verifiedOwnership = signature.verifySignedHash(messageHashScalar, publicKey);
 
         // verify signature - ownership
         return {
           verifiedOwnership,
           verifiedMembership,
-          merkleRoot
+          merkleRoot,
+          messageHashHash,
         }
       },
     },

@@ -70,22 +70,25 @@ export default async function handler(
   let bytesOfXY = Bytes64.fromHex(publicKeyHex.substring(4));
 
   let signature = Ecdsa.fromHex(signatureHex);
-  let msgHash = Scalar.from(BigInt(messageHashHex));
+  let msgHashScalar = Scalar.from(BigInt(messageHashHex));
   let publicKeyCurve = Secp256k1.from(publicKeyPoint);
 
-  console.log("start proof")
+  let msgHashHash = Poseidon.hash(msgHashScalar.toFields());
+
+  console.log("proof start");
 
   let proof = await verifyOwnershipMembershipProgram.verifyOwnershipInclusion(
-    msgHash,
+    Field(merkleProofJSON.root),
+    msgHashScalar,
+    msgHashHash,
     signature,
     publicKeyCurve,
-    Field(merkleProofJSON.root),
     MerkleProof.fromJSON(merkleProofJSON),
     Field(merkleProofIndex),
     bytesOfXY
   );
 
-  console.log("done proof", proof.toJSON());
+  console.log("proof done", proof.toJSON());
   console.log(proof.publicOutput);
 
   return response.status(200).send({ message: `success`, proof });
