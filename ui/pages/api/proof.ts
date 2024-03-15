@@ -26,7 +26,7 @@ type ResponseData = {
 
 export default async function handler(
   request: NextApiRequest,
-  response: NextApiResponse<ResponseData>
+  response: NextApiResponse
 ) {
   
   // if (request.method !== "POST") {
@@ -85,7 +85,8 @@ export default async function handler(
     bytesOfXY
   );
 
-  console.log("done proof", proof.publicOutput.toJSON())
+  console.log("done proof", proof.toJSON());
+  console.log(proof.publicOutput);
 
-  return response.status(200).send({ message: `success` });
+  return response.status(200).send({ message: `success`, proof });
 }

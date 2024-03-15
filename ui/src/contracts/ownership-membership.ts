@@ -8,8 +8,10 @@ import {
   Keccak,
   Bytes,
   Poseidon,
-  Provable
+  Provable,
+  Struct
 } from 'o1js';
+
 import { ProvableMerkleTreeUtils } from './lib/merkle/verify_circuit';
 
 export {
@@ -28,10 +30,16 @@ class Secp256k1 extends createForeignCurve(Crypto.CurveParams.Secp256k1) {}
 class Scalar extends Secp256k1.Scalar {}
 class Ecdsa extends createEcdsa(Secp256k1) {}
 
+export class PublicOutput extends Struct({
+  verifiedOwnership: Bool,
+  verifiedMembership: Bool,
+  merkleRoot: Field,
+}) {}
+
 const verifyOwnershipMembershipProgram = ZkProgram({
   name: 'ownership-membership-program',
   publicInput: Scalar.provable,
-  publicOutput: Bool,
+  publicOutput: PublicOutput,
 
   methods: {
     verifyOwnershipInclusion: {
@@ -51,7 +59,7 @@ const verifyOwnershipMembershipProgram = ZkProgram({
         merkleProof: MerkleProof,
         merkleIndex: Field,
         bytesOfXY: Bytes64
-      ) {
+      ): PublicOutput {
         // check for inclusion
         const ethAddressFields = Keccak.ethereum(bytesOfXY)
           .toFields()
@@ -85,18 +93,22 @@ const verifyOwnershipMembershipProgram = ZkProgram({
         const leafHash = Poseidon.hash(ethAddressFields);
         // Provable.log("leafHash", leafHash);
 
-        ProvableMerkleTreeUtils.checkMembership(
+        const verifiedMembership = ProvableMerkleTreeUtils.checkMembership(
           merkleProof,
           merkleRoot,
           merkleIndex,
           leafHash,
           Field
-        ).assertTrue('checkMembership failed');
+        ); //.assertTrue('checkMembership failed');
 
-        // Provable.log("checkMembership done");
+        const verifiedOwnership = signature.verifySignedHash(message, publicKey);
 
         // verify signature - ownership
-        return signature.verifySignedHash(message, publicKey);
+        return {
+          verifiedOwnership,
+          verifiedMembership,
+          merkleRoot
+        }
       },
     },
   },
