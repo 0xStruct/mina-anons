@@ -13,7 +13,7 @@ import {
 import { ProvableMerkleTreeUtils } from './lib/merkle/verify_circuit.js';
 
 export {
-  verifyOwnershipInclusionProgram,
+  verifyOwnershipMembershipProgram,
   Secp256k1,
   Ecdsa,
   Scalar,
@@ -28,13 +28,13 @@ class Secp256k1 extends createForeignCurve(Crypto.CurveParams.Secp256k1) {}
 class Scalar extends Secp256k1.Scalar {}
 class Ecdsa extends createEcdsa(Secp256k1) {}
 
-const verifyOwnershipInclusionProgram = ZkProgram({
-  name: 'ownership-inclusion-program',
+const verifyOwnershipMembershipProgram = ZkProgram({
+  name: 'ownership-membership-program',
   publicInput: Scalar.provable,
   publicOutput: Bool,
 
   methods: {
-    verifyOwnershipInclusion: {
+    verifyOwnershipMembership: {
       privateInputs: [
         Ecdsa.provable,
         Secp256k1.provable,
@@ -52,7 +52,7 @@ const verifyOwnershipInclusionProgram = ZkProgram({
         merkleIndex: Field,
         bytesOfXY: Bytes64
       ) {
-        // check for inclusion
+        // check for membership
         const ethAddressFields = Keccak.ethereum(bytesOfXY)
           .toFields()
           .slice(12); // take only the last 20
@@ -81,7 +81,7 @@ const verifyOwnershipInclusionProgram = ZkProgram({
 
         // Provable.log("check publicKey (in bytes) vs publicKey (in curve) done");
 
-        // check for inclusion
+        // check for membership
         const leafHash = Poseidon.hash(ethAddressFields);
         // Provable.log("leafHash", leafHash);
 

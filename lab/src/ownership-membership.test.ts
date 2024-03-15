@@ -1,11 +1,11 @@
 import {
-  verifyOwnershipInclusionProgram,
+  verifyOwnershipMembershipProgram,
   Secp256k1,
   Ecdsa,
   Scalar,
   MerkleProof,
   Bytes64,
-} from './ownership-inclusion.js';
+} from './ownership-membership.js';
 import { Cache, Gadgets, Poseidon, Field, Bytes, Bool } from 'o1js';
 import assert from 'assert';
 import fs from 'fs';
@@ -21,7 +21,7 @@ import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
 // clean the './db' folder as dynamic keypairs are used for each run
 fs.rmSync('./db', { recursive: true, force: true });
 
-describe('verifyOwnershipInclusion', () => {
+describe('verifyOwnershipMembership', () => {
   let tree: MerkleTree<Field>;
   let merkleRoot: Field, merkleProof: MerkleProof, merkleIndex: Field;
 
@@ -49,7 +49,7 @@ describe('verifyOwnershipInclusion', () => {
     console.log('compiling ZkProgram ...');
     console.time('compile ZkProgram');
     const cache: Cache = Cache.FileSystem('./cache');
-    await verifyOwnershipInclusionProgram.compile({ cache });
+    await verifyOwnershipMembershipProgram.compile({ cache });
     console.timeEnd('compile ZkProgram');
 
     // off-chain persistence with levelDB
@@ -58,7 +58,7 @@ describe('verifyOwnershipInclusion', () => {
     let store: LevelStore<Field> = new LevelStore<Field>(
       levelDb,
       Field,
-      'inclusionSet'
+      'membershipSet'
     );
 
     // build or load MerkleTree
@@ -80,7 +80,7 @@ describe('verifyOwnershipInclusion', () => {
     console.log("tree.getRoot", tree.getRoot().toString());
   });
 
-  it('verify account[0] ownership + inclusion, it is in the list', async () => {
+  it('verify account[0] ownership + membership, it is in the list', async () => {
     console.log('=== sign with viem');
     const signature0 = await accounts[0].signMessage({ message });
     console.log('signature0', signature0);
@@ -116,7 +116,7 @@ describe('verifyOwnershipInclusion', () => {
     merkleProof = await tree.prove(0n);
     merkleIndex = Field(0n);
 
-    let proof = await verifyOwnershipInclusionProgram.verifyOwnershipInclusion(
+    let proof = await verifyOwnershipMembershipProgram.verifyOwnershipMembership(
       msgHash,
       signature,
       publicKeyCurve,
@@ -128,10 +128,10 @@ describe('verifyOwnershipInclusion', () => {
 
     //proof.publicOutput.assertTrue('signature wrong');
     expect(proof.publicOutput).toEqual(Bool(true));
-    assert(await verifyOwnershipInclusionProgram.verify(proof), 'proof wrong');
+    assert(await verifyOwnershipMembershipProgram.verify(proof), 'proof wrong');
   });
   
-  it('verify accounts[0] ownership + inclusion, with accounts[1] signature', async () => {
+  it('verify accounts[0] ownership + membership, with accounts[1] signature', async () => {
     expect(async () => {
       console.log('=== sign with viem');
       const signature0 = await accounts[1].signMessage({ message }); // sign with accounts[1]
@@ -169,7 +169,7 @@ describe('verifyOwnershipInclusion', () => {
       merkleIndex = Field(0n);
 
       let proof =
-        await verifyOwnershipInclusionProgram.verifyOwnershipInclusion(
+        await verifyOwnershipMembershipProgram.verifyOwnershipMembership(
           msgHash,
           signature,
           publicKeyCurve,
@@ -181,7 +181,7 @@ describe('verifyOwnershipInclusion', () => {
     }).rejects.toThrow('checkMembership failed');
   });
   
-  it('verify accounts[4] ownership + inclusion, it is not in the list', async () => {
+  it('verify accounts[4] ownership + membership, it is not in the list', async () => {
     expect(async () => {
       console.log('=== sign with viem');
       const signature4 = await accounts[0].signMessage({ message });
@@ -219,7 +219,7 @@ describe('verifyOwnershipInclusion', () => {
       merkleIndex = Field(0n);
 
       let proof =
-        await verifyOwnershipInclusionProgram.verifyOwnershipInclusion(
+        await verifyOwnershipMembershipProgram.verifyOwnershipMembership(
           msgHash,
           signature,
           publicKeyCurve,
