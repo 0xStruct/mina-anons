@@ -16,7 +16,8 @@ function App() {
   const [signature, setSignature] = useState<`0x${string}` | undefined>();
   const [message, setMessage] = useState<string>("hello");
   const [merkle, setMerkle] = useState<any | null>(null);
-  const [proof, setProof] = useState<string | null>(null);
+  const [proof, setProof] = useState<any | null>(null);
+  const [pinata, setPinata] = useState<any | null>(null);
   const [recoveredAddress, setRecoveredAddress] = useState<
     `0x${string}` | undefined
   >();
@@ -27,6 +28,7 @@ function App() {
     setStep(1);
     setMerkle(null);
     setRecoveredAddress(undefined);
+    setIsLoading(false);
   };
 
   const mockConnect = (i: number) => {
@@ -91,10 +93,42 @@ function App() {
 
     let res = await response.json();
     console.log("/api/proof response", res);
+    console.log(res.proof.publicOutput);
 
     setIsLoading(false);
     setProof(res);
+
     setStep(3);
+  };
+
+  const doPostProof = async () => {
+    setIsLoading(true);
+
+    const postData = {
+      message: message,
+      proof: proof.proof,
+      verificationKey: proof.verificationKey,
+    };
+
+    // console.log("postData", postData);
+
+    const response = await fetch(`/api/post-to-pinata`, {
+      method: "POST",
+      mode: "cors", // no-cors, *cors, same-origin
+      cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: "same-origin", // include, *same-origin, omit
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(postData), // body data type must match "Content-Type" header
+    });
+
+    let res = await response.json();
+    console.log("pinata ipfs response", res);
+    setPinata(res);
+    setIsLoading(false);
+
+    setStep(4);
   };
 
   return (
@@ -117,7 +151,7 @@ function App() {
                 </span>
               </div>
               <div className="chat-footer opacity-30 text-xs">
-                Mock Wallet of Index #{accountIndex}
+                Mock wallet of Index #{accountIndex}
               </div>
             </div>
           </div>
@@ -164,6 +198,7 @@ function App() {
           Post
         </li>
       </ul>
+
       <div className="p-4 grid place-items-center">
         {step === 1 && (
           <>
@@ -203,7 +238,7 @@ function App() {
 
         {step === 2 && (
           <>
-            <div role="alert" className="alert alert-info text-xs">
+            <div role="alert" className="alert alert-info text-xs mb-4">
               <span>
                 ✅ Signature, hence publicKey, is now ready.
                 <br />
@@ -214,6 +249,19 @@ function App() {
                 generated.
               </span>
             </div>
+            {isLoading && (
+              <div role="alert" className="alert alert-info text-xs mb-4">
+                <span>
+                  ⏳ Proving process involves compling of ZkProgram and actual
+                  proving
+                  <br />
+                  ⏱ it takes a couple of minutes
+                  <br />
+                  🤐 As the whole process is happening on your computer, your
+                  privacy is preserved
+                </span>
+              </div>
+            )}
             <button
               className="btn btn-primary btn-wide my-4"
               onClick={() => doGenerateProof()}
@@ -227,19 +275,6 @@ function App() {
                 "Generate Proof"
               )}
             </button>
-            {isLoading && (
-              <div role="alert" className="alert alert-info text-xs">
-                <span>
-                  ⏳ Proving process involves compling of ZkProgram and actual
-                  proving
-                  <br />
-                  ⏱ it takes a couple of minutes
-                  <br />
-                  🤐 As the whole process is happening on your computer, your
-                  privacy is preserved
-                </span>
-              </div>
-            )}
           </>
         )}
 
@@ -253,9 +288,50 @@ function App() {
                 feed.
               </span>
             </div>
-            <button className="btn btn-primary btn-wide my-4">
-              Post Proof
+            <button
+              className="btn btn-primary btn-wide my-4"
+              onClick={() => doPostProof()}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <span className="loading loading-spinner"></span>Posting ...
+                </>
+              ) : (
+                "Post Proof"
+              )}
             </button>
+          </>
+        )}
+
+        {step === 4 && (
+          <>
+            <div role="alert" className="alert alert-success text-xs mb-4">
+              <span>
+                ✅ Proof is posted successfully to decentralized web as JSON on
+                IPFS
+                <br />✅ It will be curated and posted to X as an anonymous post
+                with proof
+              </span>
+            </div>
+            <div role="alert" className="alert alert-success text-xs mb-4">
+              <span>
+                ✅ IPFS Hash:{" "}
+                <a
+                  href={`https://${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${pinata.IpfsHash}`}
+                  target="_blank"
+                >
+                  {pinata.IpfsHash}
+                </a>
+              </span>
+            </div>
+            <a
+              className="btn btn-primary btn-wide mb-4"
+              href={`https://${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${pinata.IpfsHash}`}
+              target="_blank"
+            >
+              View Proof
+            </a>
           </>
         )}
 
@@ -280,6 +356,18 @@ function App() {
               <br />
               Merkle Proof:{" "}
               {JSON.stringify(merkle?.merkleProofJSON).substring(0, 60)} ...
+            </span>
+          </div>
+        )}
+
+        {step > 2 && proof && (
+          <div className="alert text-xs mt-4">
+            <span>
+              Ownership verified:{" "}
+              {proof.proof.publicOutput[0] === "1" ? "✅" : "🚫"}
+              <br />
+              Membership verified:{" "}
+              {proof.proof.publicOutput[0] === "1" ? "✅" : "🚫"}
             </span>
           </div>
         )}

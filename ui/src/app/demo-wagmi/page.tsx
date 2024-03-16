@@ -12,7 +12,8 @@ function App() {
   const [signature, setSignature] = useState<`0x${string}` | undefined>();
   const [message, setMessage] = useState<string>("hello");
   const [merkle, setMerkle] = useState<any | null>(null);
-  const [proof, setProof] = useState<string | null>(null);
+  const [proof, setProof] = useState<any | null>(null);
+  const [pinata, setPinata] = useState<any | null>(null);
   const [recoveredAddress, setRecoveredAddress] = useState("");
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -85,6 +86,36 @@ function App() {
     setIsLoading(false);
     setProof(res);
     setStep(3);
+  };
+
+  const doPostProof = async () => {
+    setIsLoading(true);
+
+    const postData = {
+      message: message,
+      proof: proof.proof,
+      verificationKey: proof.verificationKey,
+    };
+
+    // console.log("postData", postData);
+
+    const response = await fetch(`/api/post-to-pinata`, {
+      method: "POST",
+      mode: "cors", // no-cors, *cors, same-origin
+      cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: "same-origin", // include, *same-origin, omit
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(postData), // body data type must match "Content-Type" header
+    });
+
+    let res = await response.json();
+    console.log("pinata ipfs response", res);
+    setPinata(res);
+    setIsLoading(false);
+
+    setStep(4);
   };
 
   return (
@@ -246,11 +277,20 @@ function App() {
 
         {step === 3 && (
           <>
+            <div role="alert" className="alert alert-info text-xs">
+              <span>
+                ✅ Ownership and membership proof is ready.
+                <br />
+                💡 Post the proof for archival on IPFS and curation to Twitter
+                feed.
+              </span>
+            </div>
             <button
-              className="btn btn-primary w-full my-4"
-              disabled={isPending}
+              className="btn btn-primary btn-wide my-4"
+              onClick={() => doPostProof()}
+              disabled={isLoading}
             >
-              {isPending ? (
+              {isLoading ? (
                 <>
                   <span className="loading loading-spinner"></span>Posting ...
                 </>
@@ -258,6 +298,37 @@ function App() {
                 "Post Proof"
               )}
             </button>
+          </>
+        )}
+
+        {step === 4 && (
+          <>
+            <div role="alert" className="alert alert-success text-xs mb-4">
+              <span>
+                ✅ Proof is posted successfully to decentralized web as JSON on
+                IPFS
+                <br />✅ It will be curated and posted to X as an anonymous post
+                with proof
+              </span>
+            </div>
+            <div role="alert" className="alert alert-success text-xs mb-4">
+              <span>
+                IPFS Hash:{" "}
+                <a
+                  href={`https://${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${pinata.IpfsHash}`}
+                  target="_blank"
+                >
+                  {pinata.IpfsHash}
+                </a>
+              </span>
+            </div>
+            <a
+              className="btn btn-primary btn-wide mb-4"
+              href={`https://${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${pinata.IpfsHash}`}
+              target="_blank"
+            >
+              View Proof
+            </a>
           </>
         )}
 

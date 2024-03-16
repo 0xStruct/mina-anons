@@ -33,7 +33,6 @@ class Ecdsa extends createEcdsa(Secp256k1) {}
 export class PublicOutput extends Struct({
   verifiedOwnership: Bool,
   verifiedMembership: Bool,
-  merkleRoot: Field,
   messageHashHash: Field,
 }) {}
 
@@ -112,7 +111,6 @@ const verifyOwnershipMembershipProgram = ZkProgram({
         return {
           verifiedOwnership,
           verifiedMembership,
-          merkleRoot,
           messageHashHash,
         }
       },

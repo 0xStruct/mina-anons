@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import fs from "fs";
 
-import { Bytes, Cache, Field, Gadgets, Keccak, Poseidon, JsonProof } from "o1js";
+import { Bytes, Cache, Field, Gadgets, Keccak, Poseidon, JsonProof, verify } from "o1js";
 import {
   verifyOwnershipMembershipProgram,
   verifyOwnershipMembershipProof,
@@ -11,14 +11,9 @@ import {
   Ecdsa,
   Scalar,
   Bytes64,
-} from "../../src/contracts/ownership-membership";
-
-import { Level } from "level";
-import { LevelStore } from "../../src/contracts/lib/store/level_store";
-import { MerkleTree } from "../../src/contracts/lib/merkle/merkle_tree";
+} from "@/contracts/ownership-membership";
 
 import { hashMessage, recoverPublicKey } from "viem";
-import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
 
 type ResponseData = {
   message: string;
@@ -29,13 +24,13 @@ export default async function handler(
   response: NextApiResponse
 ) {
   
-  // if (request.method !== "POST") {
-  //   return response.status(405).send({ message: `Method Not Allowed` });
-  // }
+  if (request.method !== "POST") {
+    return response.status(405).send({ message: `Method Not Allowed` });
+  }
 
   const { messageHashHex, signatureHex, merkleProofJSON, merkleProofIndex } = request.body;
 
-  console.log(request.body);
+  console.log("request.body", request.body);
 
   const publicKeyHex = await recoverPublicKey({
     hash: messageHashHex,
@@ -61,7 +56,7 @@ export default async function handler(
 
   console.log("compiling zkProgram ...");
   const cache: Cache = Cache.FileSystem("./cache");
-  await verifyOwnershipMembershipProgram.compile({ cache }); // use cache for faster compilation
+  const { verificationKey } = await verifyOwnershipMembershipProgram.compile({ cache }); // use cache for faster compilation
   console.log("compiled zkProgram ...");
 
   // const ethereumAddressFields = Keccak.ethereum(Bytes.fromHex(publicKeyHex.substring(4))).toFields().slice(12);
@@ -91,5 +86,8 @@ export default async function handler(
   console.log("proof done", proof.toJSON());
   console.log(proof.publicOutput);
 
-  return response.status(200).send({ message: `success`, proof });
+  const ok = await verify(proof.toJSON(), verificationKey);
+  console.log("proof verification", ok);
+
+  return response.status(200).send({ message: `success`, proof, verificationKey });
 }

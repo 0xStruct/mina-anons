@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { MemoryStore } from "../../src/contracts/lib/store/memory_store";
-import { MerkleTree } from "../../src/contracts/lib/merkle/merkle_tree";
+import { MemoryStore } from "@/contracts/lib/store/memory_store";
+import { MerkleTree } from "@/contracts/lib/merkle/merkle_tree";
 
 import { Bytes, Field, Poseidon } from "o1js";
 
