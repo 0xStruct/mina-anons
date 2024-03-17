@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAccount, useConnect, useDisconnect, useSignMessage } from "wagmi";
-import { hashMessage, recoverMessageAddress } from "viem";
+import { recoverMessageAddress } from "viem";
 
 function App() {
   const account = useAccount();
@@ -55,7 +55,25 @@ function App() {
     setProofIpfs(res);
     setMessage(res.message);
 
+    await doProofVerification(res);
+
     setIsLoading(false);
+  };
+
+  const doProofVerification = async (proof: any) => {
+    const response = await fetch(`/api/proof-verify`, {
+      method: "POST",
+      mode: "cors", // no-cors, *cors, same-origin
+      cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: "same-origin", // include, *same-origin, omit
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(proof), // body data type must match "Content-Type" header
+    });
+
+    let res = await response.json();
+    console.log("/api/proof-verify response", res);
   };
 
   return (
@@ -151,9 +169,9 @@ function App() {
                 onClick={() => fetchProofIpfs()}
                 disabled={isLoading}
               >
-                {isPending ? (
+                {isLoading ? (
                   <>
-                    <span className="loading loading-spinner"></span>...
+                    <span className="loading loading-spinner"></span>
                   </>
                 ) : (
                   "Fetch"
@@ -169,19 +187,19 @@ function App() {
               className={`textarea textarea-bordered h-24 ${message !== "" ? "textarea-success" : ""}`}
               id="message"
               name="message"
-              value={message}
+              defaultValue={message}
               placeholder="message to be loaded from proof IPFS"
               contentEditable="false"
             ></textarea>
           </label>
           <a
-            className={`btn btn-wide bg-black my-4 ${message.length === 0 ? "btn-disabled" : ""}`}
+            className={`btn btn-wide bg-black my-4 ${message === "" || isLoading ? "btn-disabled" : ""}`}
             target="_blank"
             href={`https://twitter.com/intent/tweet?text=${message}%0A%0A[Proof IPFS Hash:%20${ipfsHash}]&url=https://${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${ipfsHash}&via=mina_anons`}
           >
-            {isPending ? (
+            {isLoading ? (
               <>
-                <span className="loading loading-spinner"></span> ...
+                <span className="loading loading-spinner"></span>
               </>
             ) : (
               <>
@@ -213,6 +231,22 @@ function App() {
               {signMessageData?.substring(0, 8) +
                 " ... " +
                 signMessageData?.substring(124)}
+            </span>
+          </div>
+        )}
+
+        {proofIpfs && isLoading && (
+          <div className="alert text-xs mt-4">
+            <span>
+              Verifying JSON proof ...
+            </span>
+          </div>
+        )}
+
+        {proofIpfs && !isLoading && (
+          <div className="alert text-xs mt-4">
+            <span>
+              Verification done!
             </span>
           </div>
         )}
