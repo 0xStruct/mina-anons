@@ -37,7 +37,7 @@ export default async function handler(
   await tree.update(1n, accountHashes[1]);
   await tree.update(2n, accountHashes[2]);
   await tree.update(3n, accountHashes[3]);
-  await tree.update(4n, accountHashes[4]);
+  await tree.update(4n, accountHashes[4]);  
 
   let merkleProof = await tree.prove(BigInt(String(merkleProofIndex)));
   let merkleProofJSON = merkleProof.toJSON();

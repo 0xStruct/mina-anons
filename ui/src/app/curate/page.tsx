@@ -1,46 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAccount, useConnect, useDisconnect, useSignMessage } from "wagmi";
-import { recoverMessageAddress } from "viem";
+import { useState } from "react";
 
 function App() {
-  const account = useAccount();
-  const { connectors, connect, status, error } = useConnect();
-  const { disconnect } = useDisconnect();
-
-  const [signature, setSignature] = useState<`0x${string}` | undefined>();
   const [ipfsHash, setIpfsHash] = useState<string>(
     "bafkreigpehz6ozqdgnhc74a32yhjzd73356zbcd6wefpzmcmd4sjm3nsim"
   );
   const [message, setMessage] = useState<string>("");
   const [proofIpfs, setProofIpfs] = useState<any | null>(null);
-  const [recoveredAddress, setRecoveredAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  const {
-    data: signMessageData,
-    error: errorSign,
-    isPending,
-    signMessage,
-    variables,
-  } = useSignMessage();
-
-  const reset = () => {
-    setRecoveredAddress("");
-  };
-
-  useEffect(() => {
-    (async () => {
-      if (variables?.message && signMessageData) {
-        const recoveredAddress = await recoverMessageAddress({
-          message: variables?.message,
-          signature: signMessageData,
-        });
-        setRecoveredAddress(recoveredAddress);
-      }
-    })();
-  }, [signMessageData, variables?.message]);
 
   const fetchProofIpfs = async () => {
     setIsLoading(true);
@@ -78,71 +46,9 @@ function App() {
 
   return (
     <div className="container max-w-4xl mx-auto">
-      {account.status === "connected" && (
-        <div className="w-full pt-4 pb-2">
-          <div className="float-left">
-            <div className="chat chat-start">
-              <div className="chat-image avatar">
-                <div className="w-10 rounded-full ring ring-success ring-offset-base-100 ring-offset-2">
-                  <img
-                    src={`https://api.dicebear.com/8.x/thumbs/svg?seed=${account?.addresses[0]}`}
-                  />
-                </div>
-              </div>
-              <div className="chat-bubble text-xs font-mono">
-                <span>
-                  {account?.addresses[0]}
-                  {"       \u00a0       \u00a0       \u00a0"}
-                </span>
-              </div>
-              <div className="chat-footer opacity-20 text-xs">
-                On chainID: {account.chainId}, Status: {status}
-              </div>
-            </div>
-          </div>
+      <div className="mb-16">
 
-          <button
-            className="btn btn-secondary float-right"
-            onClick={() => {
-              disconnect();
-              reset();
-            }}
-          >
-            Disconnect Wallet
-          </button>
-          <div className="clear-right"></div>
-        </div>
-      )}
-      {account.status !== "connected" && (
-        <nav className="dropdown dropdown-end dropdown-bottom w-full pt-4 pb-2">
-          <button tabIndex={0} className="btn float-right">
-            Connect Wallet
-          </button>
-          <ul
-            tabIndex={0}
-            className="menu dropdown-content box z-50 w-52 bg-base-300 p-1 shadow"
-          >
-            {connectors.map((connector) => (
-              <li key={connector.uid}>
-                <a
-                  className=""
-                  key={connector.uid}
-                  onClick={() => connect({ connector })}
-                >
-                  {connector.name}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      )}
-
-      {error?.message && (
-        <div className="alert alert-error text-xs">
-          <span>{error?.message}</span>
-        </div>
-      )}
-
+      </div>
       <div className="w-full p-4 grid place-items-center">
         <>
           <div role="alert" className="alert alert-info text-xs mb-4">
@@ -223,18 +129,6 @@ function App() {
           </a>
         </>
 
-        {recoveredAddress && (
-          <div className="alert text-xs mt-4">
-            <span>
-              Recovered Address: {recoveredAddress} <br />
-              Signature:{" "}
-              {signMessageData?.substring(0, 8) +
-                " ... " +
-                signMessageData?.substring(124)}
-            </span>
-          </div>
-        )}
-
         {proofIpfs && isLoading && (
           <div className="alert text-xs mt-4">
             <span>
@@ -251,11 +145,6 @@ function App() {
           </div>
         )}
 
-        {errorSign && (
-          <div className="alert alert-error text-xs mt-4">
-            <span>{errorSign.message}</span>
-          </div>
-        )}
       </div>
     </div>
   );
