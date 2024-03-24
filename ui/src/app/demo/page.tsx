@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 import {
   hashMessage,
@@ -8,7 +8,7 @@ import {
   recoverMessageAddress,
   PrivateKeyAccount,
 } from "viem";
-import { PRIVATE_KEYS, ACCOUNTS } from "@/config";
+import { ACCOUNTS } from "@/config";
 
 function App() {
   const [account, setAccount] = useState<PrivateKeyAccount | null>(null);
@@ -23,6 +23,39 @@ function App() {
   >();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+
+  const proofWorkerRef = useRef<Worker>();
+
+  // initate proofWorker and listen to callback
+  useEffect(() => {
+    console.log("init");
+    proofWorkerRef.current = new Worker(
+      new URL("@/workers/proof.worker", import.meta.url)
+    );
+    proofWorkerRef.current.onmessage = (event: MessageEvent) => {
+      console.log("worker has responded", event.data);
+    };
+    return () => {
+      proofWorkerRef.current?.terminate();
+    };
+  }, []);
+
+  // const doGenerateProofWithWorker = useCallback(async () => {
+  //   // proofWorkerRef.current?.postMessage(100000);
+  //   setIsLoading(true);
+
+  //   const messageHashHex = hashMessage(message);
+  //   const signatureHex = signature;
+  //   const merkleProofJSON = merkle?.merkleProofJSON;
+  //   const merkleProofIndex = accountIndex;
+
+  //   proofWorkerRef.current?.postMessage({
+  //     messageHashHex,
+  //     signatureHex,
+  //     merkleProofJSON,
+  //     merkleProofIndex,
+  //   });
+  // }, []);
 
   const reset = () => {
     setStep(1);
@@ -70,6 +103,7 @@ function App() {
     setStep(2);
   };
 
+  /* proof generation via posting to local API
   const doGenerateProof = async () => {
     setIsLoading(true);
 
@@ -80,6 +114,7 @@ function App() {
       merkleProofIndex: accountIndex,
     };
 
+    // post to local API - requiring user to run Next.js app
     const response = await fetch(`/api/proof`, {
       method: "POST",
       mode: "cors", // no-cors, *cors, same-origin
@@ -99,6 +134,78 @@ function App() {
     setProof(res);
 
     setStep(3);
+  };
+  */
+
+  /*
+  const loadForProof = async () => {
+    const { Field, ZkProgram } = await import("o1js");
+  
+    // const {
+    //   verifyOwnershipMembershipProgram,
+    //   MerkleProof,
+    //   Secp256k1,
+    //   Ecdsa,
+    //   Scalar,
+    //   Bytes64,
+    // } = await import("@/contracts/ownership-membership");
+
+    // const { verifyMembershipProgram } = await import("@/contracts/membership");
+  
+    return {
+      Field,
+      ZkProgram,
+    };
+  };
+  */
+
+  // instead of posting to local API, do it on UI via worker
+  const doGenerateProofOnUI = async () => {
+    setIsLoading(true);
+
+    const messageHashHex = hashMessage(message);
+    const signatureHex = signature;
+    const merkleProofJSON = merkle?.merkleProofJSON;
+    const merkleProofIndex = accountIndex;
+
+    const postData = {
+      messageHashHex,
+      signatureHex,
+      merkleProofJSON,
+      merkleProofIndex,
+    }
+
+    proofWorkerRef.current?.postMessage(JSON.stringify(postData));
+
+    // try {
+    //   const {
+    //     Field,
+    //     ZkProgram,
+    //   } = await loadForProof();
+
+    //   const myProgram = ZkProgram({
+    //     name: 'myProgram',
+    //     publicOutput: Field,
+    //     methods: {
+    //       prove: {
+    //         privateInputs: [Field],
+    //         method(value: any): any {
+    //           value.assertEquals(Field(1));
+    //           return Field(1);
+    //         },
+    //       },
+    //     },
+    //   });
+
+    //   await myProgram.compile();
+    // } catch(e) {
+    //   console.log("e", e);
+    // }
+
+    // these are now done after success message from worker
+    // setIsLoading(false);
+    // setProof({proof, verificationKey});
+    // setStep(3);
   };
 
   const doPostProof = async () => {
@@ -140,7 +247,7 @@ function App() {
               <div className="chat-image avatar">
                 <div className="w-10 rounded-full ring ring-success ring-offset-base-100 ring-offset-2">
                   <img
-                    src={`https://api.dicebear.com/8.x/thumbs/svg?seed=${account?.address}`}
+                    src={`https://api.dicebear.com/8.x/thumbs/svg?seed=${account?.address}`} crossOrigin="anonymous"
                   />
                 </div>
               </div>
@@ -264,7 +371,7 @@ function App() {
             )}
             <button
               className="btn btn-primary btn-wide my-4"
-              onClick={() => doGenerateProof()}
+              onClick={() => doGenerateProofOnUI()}
               disabled={isLoading}
             >
               {isLoading ? (

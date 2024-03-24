@@ -127,7 +127,7 @@ function App() {
               <div className="chat-image avatar">
                 <div className="w-10 rounded-full ring ring-success ring-offset-base-100 ring-offset-2">
                   <img
-                    src={`https://api.dicebear.com/8.x/thumbs/svg?seed=${account?.addresses[0]}`}
+                    src={`https://api.dicebear.com/8.x/thumbs/svg?seed=${account?.addresses[0]}`} crossOrigin="anonymous"
                   />
                 </div>
               </div>

@@ -1,8 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import fs from "fs";
-
-import { Bytes, Cache, Field, Gadgets, Keccak, Poseidon, JsonProof, verify } from "o1js";
+import { Cache, Field, Gadgets, Keccak, Poseidon, verify } from "o1js";
 import {
   verifyOwnershipMembershipProgram,
   verifyOwnershipMembershipProof,

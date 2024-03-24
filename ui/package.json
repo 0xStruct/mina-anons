@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "5.0.5",
+    "comlink": "^4.4.1",
     "level": "^8.0.1",
     "next": "^13.5.2",
     "o1js": "^0.17.0",
