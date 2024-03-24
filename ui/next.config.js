@@ -2,17 +2,15 @@
 const nextConfig = {
   reactStrictMode: false,
 
-
-  webpack(config) {
+  /*webpack(config) {
     config.resolve.alias = {
       ...config.resolve.alias,
-      o1js: require('path').resolve('node_modules/o1js')
+      o1js: require("path").resolve("node_modules/o1js"),
     };
     config.experiments = { ...config.experiments, topLevelAwait: true };
     return config;
-  },
-  // To enable o1js for the web, we must set the COOP and COEP headers.
-  // See here for more information: https://docs.minaprotocol.com/zkapps/how-to-write-a-zkapp-ui#enabling-coop-and-coep-headers
+  },*/
+
   async headers() {
     return [
       {
@@ -45,4 +43,4 @@ const nextConfig = {
   }
 };
 
-module.exports = nextConfig
+module.exports = nextConfig;

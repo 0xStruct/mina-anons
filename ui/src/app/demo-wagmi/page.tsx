@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAccount, useConnect, useDisconnect, useSignMessage } from "wagmi";
 import { hashMessage, recoverMessageAddress } from "viem";
 
@@ -25,6 +25,31 @@ function App() {
     signMessage,
     variables,
   } = useSignMessage();
+
+  const proofWorkerRef = useRef<Worker>();
+
+  // initate proofWorker and listen to callback
+  useEffect(() => {
+    console.log("init");
+    proofWorkerRef.current = new Worker(
+      new URL("@/workers/proof.worker", import.meta.url)
+    );
+    proofWorkerRef.current.onmessage = (event: MessageEvent) => {
+      console.log("worker:", event.data);
+
+      if (event.data.message === "proof-done") {
+        setProof({
+          proof: event.data.proof,
+          verificationKey: event.data.verificationKey,
+        });
+        setStep(3); // move to next step
+        setIsLoading(false);
+      }
+    };
+    return () => {
+      proofWorkerRef.current?.terminate();
+    };
+  }, []);
 
   const reset = () => {
     setStep(1);
@@ -57,6 +82,9 @@ function App() {
     console.log(res);
   };
 
+  /* 
+  // proof generation via posting to local API
+  // replaced with worker
   const doGenerateProof = async () => {
     setIsLoading(true);
 
@@ -86,6 +114,31 @@ function App() {
     setIsLoading(false);
     setProof(res);
     setStep(3);
+  };
+  */
+
+  // instead of posting to local API, do it on UI via worker
+  const doGenerateProofViaWorker = async () => {
+    setIsLoading(true);
+
+    const messageHashHex = hashMessage(message);
+    const signatureHex = signature;
+    const merkleProofJSON = merkle?.merkleProofJSON;
+    const merkleProofIndex = 0;
+
+    const postData = {
+      messageHashHex,
+      signatureHex,
+      merkleProofJSON,
+      merkleProofIndex,
+    };
+
+    proofWorkerRef.current?.postMessage(JSON.stringify(postData));
+
+    // these are now done after message === "proof-done" from worker
+    // setIsLoading(false);
+    // setProof({proof, verificationKey});
+    // setStep(3);
   };
 
   const doPostProof = async () => {
@@ -127,7 +180,8 @@ function App() {
               <div className="chat-image avatar">
                 <div className="w-10 rounded-full ring ring-success ring-offset-base-100 ring-offset-2">
                   <img
-                    src={`https://api.dicebear.com/8.x/thumbs/svg?seed=${account?.addresses[0]}`} crossOrigin="anonymous"
+                    src={`https://api.dicebear.com/8.x/thumbs/svg?seed=${account?.addresses[0]}`}
+                    crossOrigin="anonymous"
                   />
                 </div>
               </div>
@@ -248,7 +302,7 @@ function App() {
             </div>
             <button
               className="btn btn-primary btn-wide my-4"
-              onClick={() => doGenerateProof()}
+              onClick={() => doGenerateProofViaWorker()}
               disabled={isLoading}
             >
               {isLoading ? (

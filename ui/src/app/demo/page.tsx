@@ -23,6 +23,7 @@ function App() {
   >();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [workerMessage, setWorkerMessage] = useState<string>("");
 
   const proofWorkerRef = useRef<Worker>();
 
@@ -33,28 +34,28 @@ function App() {
       new URL("@/workers/proof.worker", import.meta.url)
     );
     proofWorkerRef.current.onmessage = (event: MessageEvent) => {
-      console.log("worker has responded", event.data);
+      console.log("worker:", event.data);
+      setWorkerMessage(event.data?.message);
+
+      if (event.data.message === "proof-done") {
+        console.log(event.data.proof);
+        console.log(event.data.verificationKey);
+        setProof({
+          proof: event.data.proof,
+          verificationKey: event.data.verificationKey,
+        });
+        setStep(3); // move to next step
+        setIsLoading(false);
+      }
     };
     return () => {
       proofWorkerRef.current?.terminate();
     };
   }, []);
 
-  // const doGenerateProofWithWorker = useCallback(async () => {
+  // const doGenerateProofWithWorkerCallback = useCallback(async () => {
   //   // proofWorkerRef.current?.postMessage(100000);
   //   setIsLoading(true);
-
-  //   const messageHashHex = hashMessage(message);
-  //   const signatureHex = signature;
-  //   const merkleProofJSON = merkle?.merkleProofJSON;
-  //   const merkleProofIndex = accountIndex;
-
-  //   proofWorkerRef.current?.postMessage({
-  //     messageHashHex,
-  //     signatureHex,
-  //     merkleProofJSON,
-  //     merkleProofIndex,
-  //   });
   // }, []);
 
   const reset = () => {
@@ -103,7 +104,9 @@ function App() {
     setStep(2);
   };
 
-  /* proof generation via posting to local API
+  /* 
+  // proof generation via posting to local API
+  // replaced with worker
   const doGenerateProof = async () => {
     setIsLoading(true);
 
@@ -137,30 +140,8 @@ function App() {
   };
   */
 
-  /*
-  const loadForProof = async () => {
-    const { Field, ZkProgram } = await import("o1js");
-  
-    // const {
-    //   verifyOwnershipMembershipProgram,
-    //   MerkleProof,
-    //   Secp256k1,
-    //   Ecdsa,
-    //   Scalar,
-    //   Bytes64,
-    // } = await import("@/contracts/ownership-membership");
-
-    // const { verifyMembershipProgram } = await import("@/contracts/membership");
-  
-    return {
-      Field,
-      ZkProgram,
-    };
-  };
-  */
-
   // instead of posting to local API, do it on UI via worker
-  const doGenerateProofOnUI = async () => {
+  const doGenerateProofViaWorker = async () => {
     setIsLoading(true);
 
     const messageHashHex = hashMessage(message);
@@ -173,36 +154,11 @@ function App() {
       signatureHex,
       merkleProofJSON,
       merkleProofIndex,
-    }
+    };
 
     proofWorkerRef.current?.postMessage(JSON.stringify(postData));
 
-    // try {
-    //   const {
-    //     Field,
-    //     ZkProgram,
-    //   } = await loadForProof();
-
-    //   const myProgram = ZkProgram({
-    //     name: 'myProgram',
-    //     publicOutput: Field,
-    //     methods: {
-    //       prove: {
-    //         privateInputs: [Field],
-    //         method(value: any): any {
-    //           value.assertEquals(Field(1));
-    //           return Field(1);
-    //         },
-    //       },
-    //     },
-    //   });
-
-    //   await myProgram.compile();
-    // } catch(e) {
-    //   console.log("e", e);
-    // }
-
-    // these are now done after success message from worker
+    // these are now done after message === "proof-done" from worker
     // setIsLoading(false);
     // setProof({proof, verificationKey});
     // setStep(3);
@@ -211,13 +167,15 @@ function App() {
   const doPostProof = async () => {
     setIsLoading(true);
 
+    // console.log("proof", proof);
+
     const postData = {
       message: message,
       proof: proof.proof,
-      verificationKey: proof.verificationKey,
+      verificationKey: { data: proof.verificationKey.data, hash: String(proof.verificationKey.hash.value[1][1]) }
     };
 
-    // console.log("postData", postData);
+    console.log("postData", postData);
 
     const response = await fetch(`/api/post-to-pinata`, {
       method: "POST",
@@ -247,7 +205,8 @@ function App() {
               <div className="chat-image avatar">
                 <div className="w-10 rounded-full ring ring-success ring-offset-base-100 ring-offset-2">
                   <img
-                    src={`https://api.dicebear.com/8.x/thumbs/svg?seed=${account?.address}`} crossOrigin="anonymous"
+                    src={`https://api.dicebear.com/8.x/thumbs/svg?seed=${account?.address}`}
+                    crossOrigin="anonymous"
                   />
                 </div>
               </div>
@@ -371,7 +330,7 @@ function App() {
             )}
             <button
               className="btn btn-primary btn-wide my-4"
-              onClick={() => doGenerateProofOnUI()}
+              onClick={() => doGenerateProofViaWorker()}
               disabled={isLoading}
             >
               {isLoading ? (
@@ -442,6 +401,12 @@ function App() {
           </>
         )}
 
+        {step === 2 && isLoading && (
+          <div className="alert text-xs mt-4">
+            <span>Worker: {workerMessage}</span>
+          </div>
+        )}
+
         {recoveredAddress && (
           <div className="alert text-xs mt-4">
             <span>
@@ -474,7 +439,7 @@ function App() {
               {proof.proof.publicOutput[0] === "1" ? "✅" : "🚫"}
               <br />
               Membership verified:{" "}
-              {proof.proof.publicOutput[0] === "1" ? "✅" : "🚫"}
+              {proof.proof.publicOutput[1] === "1" ? "✅" : "🚫"}
             </span>
           </div>
         )}

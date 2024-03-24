@@ -1,22 +1,7 @@
 // This is a module worker, so we can use imports (in the browser too!)
 import { recoverPublicKey } from "viem";
 
-const sleep = (delay: number) =>
-  new Promise((resolve) => setTimeout(resolve, delay));
-
-/*
-addEventListener("message", async (event: any) => {
-  console.log(event.data);
-  const res = await fetch(
-    "https://random-word-api.herokuapp.com/word?number=1"
-  );
-  const json = await res.json();
-
-  console.log(json);
-  postMessage({d: json[0]});
-});
-*/
-
+// load o1js async 
 const loadForProof = async () => {
   const { Cache, Field, Gadgets, Poseidon, ZkProgram } = await import("o1js");
 
@@ -46,6 +31,7 @@ const loadForProof = async () => {
 
 addEventListener("message", async (e: any) => {
   postMessage({ message: "proof-worker-start" });
+  
   // load o1js and ZkProgram async
   const {
     Cache,
@@ -60,7 +46,7 @@ addEventListener("message", async (e: any) => {
     Bytes64,
   } = await loadForProof();
 
-  postMessage({ message: "imported-o1js" });
+  postMessage({ message: "imported-o1js-async" });
 
   const { messageHashHex, signatureHex, merkleProofJSON, merkleProofIndex } =
     JSON.parse(e.data);
@@ -79,14 +65,14 @@ addEventListener("message", async (e: any) => {
     y: Gadgets.Field3.from(BigInt("0x" + publicKeyHex.substring(68))),
   };
 
-  postMessage({ message: "compiling-zkrogram" });
-  // const cache: Cache = Cache.FileSystem("./cache");
-  // const { verificationKey } = await verifyOwnershipMembershipProgram.compile({
-  //   cache,
-  // }); // use cache for faster compilation
+  postMessage({ message: "compiling-zkrogram-start" });
+  const cache = Cache.FileSystem("./cache");
+  const { verificationKey } = await verifyOwnershipMembershipProgram.compile({
+    cache,
+  }); // use cache for faster compilation
 
-  const { verificationKey } = await verifyOwnershipMembershipProgram.compile();
-  postMessage({ message: "compiled-zkprogram" });
+  // const { verificationKey } = await verifyOwnershipMembershipProgram.compile();
+  postMessage({ message: "compile-zkprogram-done" });
 
   console.log("verificationKey", verificationKey);
 
@@ -110,11 +96,10 @@ addEventListener("message", async (e: any) => {
     Field(merkleProofIndex!),
     bytesOfXY
   );
-  postMessage({ message: "proof-done" });
-  console.log("proof done", proof.toJSON());
-  console.log(proof.publicOutput);
 
-  postMessage({ message: "proof-done", proof });
+  console.log("proof done", proof.toJSON(), proof.publicOutput, verificationKey);
+
+  postMessage({ message: "proof-done", proof: proof.toJSON(), verificationKey: verificationKey});
 
   // not necessary to re-verify, just for reference
   // const ok = await verify(proof.toJSON(), verificationKey);
