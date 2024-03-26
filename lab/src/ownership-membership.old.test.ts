@@ -5,7 +5,7 @@ import {
   Scalar,
   MerkleProof,
   Bytes64,
-} from './ownership-membership.js';
+} from './ownership-membership.old.js';
 import { Cache, Gadgets, Poseidon, Field, Bytes, Bool } from 'o1js';
 import assert from 'assert';
 import fs from 'fs';
@@ -113,9 +113,8 @@ describe('verifyOwnershipMembership', () => {
     let bytesOfXY = Bytes64.fromHex(publicKeyHex.substring(4));
 
     let signature = Ecdsa.fromHex(signature0);
-    let msgHashScalar = Scalar.from(BigInt(hashMessage(message)));
+    let msgHash = Scalar.from(BigInt(hashMessage(message)));
     let publicKeyCurve = Secp256k1.from(publicKeyPoint);
-    let msgHashHash = Poseidon.hash(msgHashScalar.toFields());
 
     merkleRoot = tree.getRoot();
     merkleProof = await tree.prove(0n);
@@ -123,28 +122,28 @@ describe('verifyOwnershipMembership', () => {
 
     let proof =
       await verifyOwnershipMembershipProgram.verifyOwnershipMembership(
-        merkleRoot,
-        msgHashScalar,
-        msgHashHash,
+        msgHash,
         signature,
         publicKeyCurve,
+        merkleRoot,
         merkleProof,
         merkleIndex,
         bytesOfXY
       );
 
-    expect(proof.publicOutput.verifiedMembership).toEqual(Bool(true));
-    expect(proof.publicOutput.verifiedOwnership).toEqual(Bool(true));
+    //proof.publicOutput.assertTrue('signature wrong');
+    expect(proof.publicOutput).toEqual(Bool(true));
+    assert(await verifyOwnershipMembershipProgram.verify(proof), 'proof wrong');
   });
 
   it('verify accounts[0] ownership + membership, with accounts[1] signature', async () => {
     console.log('=== sign with viem');
-    const signature1 = await accounts[1].signMessage({ message }); // sign with accounts[1]
-    console.log('signature1', signature1);
+    const signature0 = await accounts[1].signMessage({ message }); // sign with accounts[1]
+    console.log('signature0', signature0);
 
     const publicKeyHex = await recoverPublicKey({
       hash: hashMessage(message),
-      signature: signature1,
+      signature: signature0,
     });
 
     console.log('recovered public key', publicKeyHex);
@@ -169,34 +168,31 @@ describe('verifyOwnershipMembership', () => {
     // publicKey: 0x + X + Y
     let bytesOfXY = Bytes64.fromHex(publicKeyHex.substring(4));
 
-    let signature = Ecdsa.fromHex(signature1);
-    let msgHashScalar = Scalar.from(BigInt(hashMessage(message)));
+    let signature = Ecdsa.fromHex(signature0);
+    let msgHash = Scalar.from(BigInt(hashMessage(message)));
     let publicKeyCurve = Secp256k1.from(publicKeyPoint);
-    let msgHashHash = Poseidon.hash(msgHashScalar.toFields());
 
     merkleRoot = tree.getRoot();
     merkleProof = await tree.prove(0n);
     merkleIndex = Field(0n);
 
-    let proof =
-      await verifyOwnershipMembershipProgram.verifyOwnershipMembership(
-        merkleRoot,
-        msgHashScalar,
-        msgHashHash,
-        signature,
-        publicKeyCurve,
-        merkleProof,
-        merkleIndex,
-        bytesOfXY
-      );
-
-    expect(proof.publicOutput.verifiedMembership).toEqual(Bool(false));
-    expect(proof.publicOutput.verifiedOwnership).toEqual(Bool(true));
+    expect(async () => {
+      let proof =
+        await verifyOwnershipMembershipProgram.verifyOwnershipMembership(
+          msgHash,
+          signature,
+          publicKeyCurve,
+          merkleRoot,
+          merkleProof,
+          merkleIndex,
+          bytesOfXY
+        );
+    }).rejects.toThrow('checkMembership failed');
   });
 
   it('verify accounts[4] ownership + membership, it is not in the list', async () => {
     console.log('=== sign with viem');
-    const signature4 = await accounts[4].signMessage({ message });
+    const signature4 = await accounts[0].signMessage({ message });
     console.log('signature4', signature4);
 
     const publicKeyHex = await recoverPublicKey({
@@ -227,87 +223,24 @@ describe('verifyOwnershipMembership', () => {
     let bytesOfXY = Bytes64.fromHex(publicKeyHex.substring(4));
 
     let signature = Ecdsa.fromHex(signature4);
-    let msgHashScalar = Scalar.from(BigInt(hashMessage(message)));
+    let msgHash = Scalar.from(BigInt(hashMessage(message)));
     let publicKeyCurve = Secp256k1.from(publicKeyPoint);
-    let msgHashHash = Poseidon.hash(msgHashScalar.toFields());
 
     merkleRoot = tree.getRoot();
     merkleProof = await tree.prove(0n);
     merkleIndex = Field(0n);
 
-    let proof =
-      await verifyOwnershipMembershipProgram.verifyOwnershipMembership(
-        merkleRoot,
-        msgHashScalar,
-        msgHashHash,
-        signature,
-        publicKeyCurve,
-        merkleProof,
-        merkleIndex,
-        bytesOfXY
-      );
-
-    expect(proof.publicOutput.verifiedMembership).toEqual(Bool(false));
-    expect(proof.publicOutput.verifiedOwnership).toEqual(Bool(true));
-  });
-
-  it('verify accounts[4] ownership + membership, it is not in the list, wrong signature of accounts[3]', async () => {
-    console.log('=== sign with viem');
-    const signature3 = await accounts[3].signMessage({ message });
-    console.log('signature3', signature3);
-    const signature4 = await accounts[4].signMessage({ message });
-    console.log('signature4', signature4);
-
-    // publicKeyHex is of accounts[3]
-    const publicKeyHex = await recoverPublicKey({
-      hash: hashMessage(message),
-      signature: signature3,
-    });
-
-    console.log('recovered public key', publicKeyHex);
-
-    // const ethereumAddressFields = Keccak.ethereum(Bytes.fromHex(publicKeyHex.substring(2))).toFields().slice(12);
-
-    type Point = { x: Gadgets.Field3; y: Gadgets.Field3 };
-
-    // publicKeyPoint is derived from X and Y point of the publickey which can be recovered from signature
-    // its format is 0x + X + Y
-    console.log(
-      'publicKey X, Y',
-      publicKeyHex.substring(4, 68),
-      publicKeyHex.substring(68)
-    );
-
-    let publicKeyPoint: Point = {
-      x: Gadgets.Field3.from(BigInt('0x' + publicKeyHex.substring(4, 68))),
-      y: Gadgets.Field3.from(BigInt('0x' + publicKeyHex.substring(68))),
-    };
-
-    // publicKey: 0x + X + Y
-    let bytesOfXY = Bytes64.fromHex(publicKeyHex.substring(4));
-
-    let signature = Ecdsa.fromHex(signature4);
-    let msgHashScalar = Scalar.from(BigInt(hashMessage(message)));
-    let publicKeyCurve = Secp256k1.from(publicKeyPoint);
-    let msgHashHash = Poseidon.hash(msgHashScalar.toFields());
-
-    merkleRoot = tree.getRoot();
-    merkleProof = await tree.prove(0n);
-    merkleIndex = Field(0n);
-
-    let proof =
-      await verifyOwnershipMembershipProgram.verifyOwnershipMembership(
-        merkleRoot,
-        msgHashScalar,
-        msgHashHash,
-        signature,
-        publicKeyCurve,
-        merkleProof,
-        merkleIndex,
-        bytesOfXY
-      );
-
-    expect(proof.publicOutput.verifiedMembership).toEqual(Bool(false));
-    expect(proof.publicOutput.verifiedOwnership).toEqual(Bool(false));
+    expect(async () => {
+      let proof =
+        await verifyOwnershipMembershipProgram.verifyOwnershipMembership(
+          msgHash,
+          signature,
+          publicKeyCurve,
+          merkleRoot,
+          merkleProof,
+          merkleIndex,
+          bytesOfXY
+        );
+    }).rejects.toThrow('checkMembership failed');
   });
 });

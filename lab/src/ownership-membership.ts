@@ -68,12 +68,16 @@ const verifyOwnershipMembershipProgram = ZkProgram({
           .slice(12); // take only the last 20
 
         // assert to assure messageHashHash is equal to messageHashScalar which is used for verification
+        // this is to ensure that message cannot be spoofed along with valid proof
         messageHashHash.assertEquals(Poseidon.hash(messageHashScalar.toFields()));
 
         // check that bytes of X and Y are equal to those from publicKey.x publicKey.y
         // 32 bytes, 256 bits
         const publicKeyXBits = publicKey.x.toBits();
         const publicKeyYBits = publicKey.y.toBits();
+
+        // do we need to check for all 32 + 32 bytes of X and Y?
+        // checking 2 + 2 bytes is sufficient
 
         // check X's first and last bytes
         Field.fromBits(publicKeyXBits.slice(0, 8)).assertEquals(
