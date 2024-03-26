@@ -56,8 +56,9 @@ let publicKeyPoint: Point = {
 let bytesOfXY = Bytes64.fromHex(publicKeyHex.substring(4));
 
 let signature = Ecdsa.fromHex(signature0);
-let msgHash = Scalar.from(BigInt(hashMessage(message)));
+let msgHashScalar = Scalar.from(BigInt(hashMessage(message)));
 let publicKeyCurve = Secp256k1.from(publicKeyPoint);
+let msgHashHash = Poseidon.hash(msgHashScalar.toFields());
 
 console.log('=== merkletree and leveldb');
 
@@ -127,15 +128,17 @@ console.timeEnd('verify ownership + membership (compile)');
 
 console.time('verify ownership + membership (prove)');
 let proof = await verifyOwnershipMembershipProgram.verifyOwnershipMembership(
-  msgHash,
+  merkleRoot,
+  msgHashScalar,
+  msgHashHash,
   signature,
   publicKeyCurve,
-  merkleRoot,
   merkleProof,
   merkleIndex,
   bytesOfXY
 );
 console.timeEnd('verify ownership + membership (prove)');
 
-proof.publicOutput.assertTrue('signature wrong');
+proof.publicOutput.verifiedMembership.assertTrue('membership not valid');
+proof.publicOutput.verifiedOwnership.assertTrue('ownership not valid');
 assert(await verifyOwnershipMembershipProgram.verify(proof), 'proof wrong');

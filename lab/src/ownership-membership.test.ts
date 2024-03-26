@@ -5,7 +5,7 @@ import {
   Scalar,
   MerkleProof,
   Bytes64,
-} from './ownership-membership.js';
+} from './ownership-membership.old.js';
 import { Cache, Gadgets, Poseidon, Field, Bytes, Bool } from 'o1js';
 import assert from 'assert';
 import fs from 'fs';
