@@ -9,7 +9,7 @@ These smaller legos will then be utilized later to create full-stack ZkApps.
 ## Demo video
 
 To illustrate running of `.test.ts` and `.run.ts` files
-[to be added later]
+🎥 https://youtu.be/_iXCUi2q5-8
 
 ## Below are a few experiements
 
