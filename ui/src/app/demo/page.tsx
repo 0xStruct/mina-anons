@@ -308,7 +308,9 @@ function App() {
               <span>
                 ✅ Signature, hence publicKey, is now ready.
                 <br />
-                ✅ merkleWitness that attests membership of a merkleTree is also
+                ✅ For demo purpose, all 5 mock addresses are put in the merkleTree
+                <br />
+                ✅ merkleWitness that attests membership of the merkleTree is also
                 ready.
                 <br />
                 💡 Anonymous proof of ownership and membership is ready to be

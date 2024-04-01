@@ -17,6 +17,7 @@ function App() {
   const [recoveredAddress, setRecoveredAddress] = useState("");
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [workerMessage, setWorkerMessage] = useState<string>("");
 
   const {
     data: signMessageData,
@@ -36,6 +37,7 @@ function App() {
     );
     proofWorkerRef.current.onmessage = (event: MessageEvent) => {
       console.log("worker:", event.data);
+      setWorkerMessage(event.data?.message);
 
       if (event.data.message === "proof-done") {
         setProof({
@@ -122,7 +124,7 @@ function App() {
     setIsLoading(true);
 
     const messageHashHex = hashMessage(message);
-    const signatureHex = signature;
+    const signatureHex = signMessageData;
     const merkleProofJSON = merkle?.merkleProofJSON;
     const merkleProofIndex = 0;
 
@@ -147,10 +149,13 @@ function App() {
     const postData = {
       message: message,
       proof: proof.proof,
-      verificationKey: proof.verificationKey,
+      verificationKey: {
+        data: proof.verificationKey.data,
+        hash: String(proof.verificationKey.hash.value[1][1]),
+      },
     };
 
-    // console.log("postData", postData);
+    console.log("postData", postData);
 
     const response = await fetch(`/api/post-to-pinata`, {
       method: "POST",
@@ -293,7 +298,9 @@ function App() {
               <span>
                 ✅ Signature, hence publicKey, is now ready.
                 <br />
-                ✅ merkleWitness that attests membership of a merkleTree is also
+                ✅ For demo purpose, your address is set at index 0 of the merkleTree
+                <br />
+                ✅ merkleWitness that attests membership of the merkleTree is also
                 ready.
                 <br />
                 💡 Anonymous proof of ownership and membership is ready to be
@@ -384,6 +391,12 @@ function App() {
               View Proof
             </a>
           </>
+        )}
+
+        {step === 2 && isLoading && (
+          <div className="alert text-xs mt-4">
+            <span>Worker: {workerMessage}</span>
+          </div>
         )}
 
         {recoveredAddress && (
