@@ -1,27 +1,29 @@
-# Mina-anons
+# Mina-anons 🥷
 
 Mina-anons is a zero-knowledge social layer which provides privacy and decentralizations for web3 and web2.
 
 The project will explores the theme of bringing Mina ZK power to other blockchains and dApps
 
-`Mina x Ethereum`, `Mina x Bitcoin` , etc
+`Mina x Ethereum`, `Mina x Bitcoin` , `Mina x Snapshot` , etc
 
-## Mina-anons 🎊 CLUB
+Demo sites: https://mina-anons.up.railway.app/ | https://mina-anons.vercel.app/
 
-[🎊 CLUB](club) is the very first of Mina-anons series
+## Mina-anons: 🎊 CLUB
+
+[🎊 CLUB](ui) is the very first of Mina-anons dApp series
 
 It enables an ethereum address to prove its ownership and membership of a specific club anonymously ...
-then post a message.
+then post an anonymous message.
 
-🎥: https://youtu.be/xOmbYQm6URs `/`
-🎥: https://youtu.be/jGe26i2kJuU `/demo`
-🎥: https://youtu.be/5Be_A7OnZi0 `/demo-wagmi`
-🎥: https://youtu.be/Nsl6ym2ZawQ `/curate`
-🎥: https://youtu.be/YsZkgOV2w0k `/club-mambo-5`
+- 🎥: https://youtu.be/xOmbYQm6URs `/`
+- 🎥: https://youtu.be/jGe26i2kJuU `/demo`
+- 🎥: https://youtu.be/5Be_A7OnZi0 `/demo-wagmi`
+- 🎥: https://youtu.be/Nsl6ym2ZawQ `/curate`
+- 🎥: https://youtu.be/YsZkgOV2w0k `/club-mambo-5`
 
-_Please refer to the folder for detailed info in its README.md_
+_Please refer to the folder for detailed info in its [README.md](ui/README.md)_
 
-This is inspired by `AnonKlub.xyz` , `HeyAnon.xyz` and various other  accounts such as [@confessions](https://twitter.com/coinfessions)
+This is inspired by [AnonKlub.xyz](https://AnonKlub.xyz) , [HeyAnon.xyz](https://heyanon.xyz) and various other accounts such as [@confessions](https://twitter.com/coinfessions)
 
 Proof is stored on the decentralized IPFS and can be verified by anyone.
 
@@ -31,7 +33,7 @@ Pinata service is used for IPFS pinning.
 
 Sample X/tweet: https://bit.ly/mina-anons-x
 
-## Mina-anons 🔬 LAB
+## Mina-anons: 🔬 LAB
 
 [🔬 LAB](lab) is a playground to experiment with ECDSA support and beyond
 
@@ -39,9 +41,9 @@ ownership or/and membership proofs can now be made by an ethereum address
 
 🎥 https://youtu.be/_iXCUi2q5-8 (tests and runs)
 
-_Please refer to the folder for detailed info in its README.md_
+_Please refer to the folder for detailed info in its [README.md](lab/README.md)_
 
-## Mina-anons 🕶⚡ Anon Snapshot
+## Mina-anons: 🕶⚡ Anon Snapshot
 [🕶⚡ Anon Snapshot](anon-snapshot) is to integrate privacy-preserving voting into `Snapshot.org`
 
 A widely popular voting platform for DAOs used by millions of DAO members

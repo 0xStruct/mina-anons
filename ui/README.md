@@ -1,4 +1,4 @@
-# Mina Anons - UI
+# Mina-anons: UI or 🎊 CLUB
 
 UI is built with Next.js, DaisyUI and WAGMI. Pinata is used for IPFS pinning.
 
@@ -7,7 +7,7 @@ UI/UX is given extra care to make Mina ZK tech accessible for users.
 ## About app structure and how to run
 
 first `cp .env.local.example .env.local`
-and enter Pinata JWT and Gateway
+and enter Pinata JWT and Gateway URL
 
 ```shell
 # use node version 18
@@ -18,9 +18,10 @@ npm install
 npm run dev
 ```
 
-`src/app/` contains pages or screens explained below
-`src/contracts/` contains ZkProgram code, mainly to verify ownership + membership anonymously
-`pages/api/` contains API endpoints used by pages
+- `src/app/` contains pages or screens explained below
+- `src/contracts/` contains ZkProgram code, mainly to verify ownership + membership anonymously
+- `pages/api/` contains API endpoints used by pages
+- `workers/` contains web workers mainly to load `o1js` related jobs smoothly on UI
 
 ## Below are app pages
 
@@ -79,8 +80,14 @@ to post proof JSON to Pinata for IPFS pinning
 
 Sample proof: [IPFS pinned on Pinata](https://apricot-odd-wallaby-508.mypinata.cloud/ipfs/bafkreigpehz6ozqdgnhc74a32yhjzd73356zbcd6wefpzmcmd4sjm3nsim)
 
-- `pages/api/proof`
+- `pages/api/proof` [deprecated, in favor of web worker]
+
+~~for generating proof for ownership + membership~~
+
+~~this is to be run by users themselves to assure that no private info is leaked to cloud servers~~
+
+## Below are workers
+
+- `workers/proof.worker.ts`
 
 for generating proof for ownership + membership
-
-this is to be run by users themselves to assure that no private info is leaked to cloud servers

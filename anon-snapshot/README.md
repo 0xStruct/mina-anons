@@ -1,5 +1,5 @@
-# 🕶⚡ Anon Snapshot
-Anon Snapshot brings privacy preserving voting into `Snapshot.org` powered by Mina Zero Knowledge
+# Mina-anons: 🕶⚡ Anon Snapshot
+Anon Snapshot brings privacy-preserving voting into `Snapshot.org` powered by Mina Zero Knowledge
 
 Snapshot is a widely popular voting platform for DAOs with millions of DAO members. It is used by Aave, ENS, ApeCoin, Starknet, Lido, Safe etc
 

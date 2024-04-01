@@ -1,8 +1,8 @@
-# Mina Anons - lab
+# Mina-anons: 🔬 LAB
 
 Lab is a playground where small legos for BIG ideas are built and tested.
 
-This development process is to make iterative followable progress while exploring the less explored territory of `Mina x Ethereum` and `Mina x Bitcoin` as inspired by Mina's ECDSA support.
+This development process is to make iterative and followable progress while exploring the less explored territory of `Mina x Ethereum` and `Mina x Bitcoin` as inspired by Mina's ECDSA support.
 
 These smaller legos will then be utilized later to create full-stack ZkApps.
 
@@ -64,7 +64,8 @@ npm run build
 node build/src/ownership-membership.run.js
 ```
 
-**test file** `ownership-membership.test.ts` is available now, testing 3 test cases
+## Run tests
+check out `.test.ts` files
 
 ```sh
 npm install
