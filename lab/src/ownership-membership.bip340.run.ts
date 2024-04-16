@@ -4,6 +4,10 @@ import { Gadgets, Crypto, Cache, Field, Poseidon, Bytes } from 'o1js';
 import { Point, Ecdsa } from '../../node_modules/o1js/dist/node/lib/gadgets/elliptic-curve.js';
 // import { Point, Ecdsa } from 'o1js'; // if available after patching
 
+import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
+import { schnorr, secp256k1 } from '@noble/curves/secp256k1';
+import { schnorrGetE } from './schnorrGetE.js';
+
 import fs from 'fs';
 
 import { MerkleTree } from './lib/merkle/merkle_tree.js';
@@ -16,51 +20,52 @@ fs.rmSync('./db', { recursive: true, force: true });
 
 const Secp256k1 = Crypto.createCurve(Crypto.CurveParams.Secp256k1);
 
-let publicKey1 = Secp256k1.scale(
-  Secp256k1.one,
-  0xb7e151628aed2a6abf7158809cf4f3c762e7160f38b4da56a784d9045190cfefn
-);
+let privateKeys = [
+  hexToBytes("B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEF"),
+  hexToBytes("C90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B14E5C9"),
+  hexToBytes("0B432B2677937381AEF05BB02A66ECD012773062CF3FA2549E44F58ED2401710"),
+  schnorr.utils.randomPrivateKey(),
+  schnorr.utils.randomPrivateKey(),
+  schnorr.utils.randomPrivateKey(),
+];
 
-let publicKey2 = Secp256k1.scale(
-  Secp256k1.one,
-  0xc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b14e5c9n
-);
+let publicKeyPoints = [
+  Point.from({
+    x: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[0]).px,
+    y: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[0]).py,
+  }),
+  Point.from({
+    x: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[1]).px,
+    y: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[1]).py,
+  }),
+  Point.from({
+    x: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[2]).px,
+    y: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[2]).py,
+  }),
+];
 
-let publicKeyPoint1 = Point.from({
-  x: publicKey1.x,
-  y: publicKey1.y,
-});
-
-let publicKeyPoint2 = Point.from({
-  x: publicKey2.x,
-  y: publicKey2.y,
-});
-
-let signature1 = Ecdsa.Signature.fromHex(
-  '0x6896bd60eeae296db48a229ff71dfe071bde413e6d43f917dc8dcf8c78de33418906d11ac976abccb20b091292bff4ea897efcb639ea871cfa95f6de339e4b0a'
-);
-
-let signature2 = Ecdsa.Signature.fromHex(
-  '0x5831aaeed7b44bb74e5eab94ba9d4294c49bcf2a60728d8b4c200f50dd313c1bab745879a5ad954a72c45a91c3a51d3c7adea98d82f8481e0e1e03674a6f3fb7'
-);
+let msg = "243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89";
+let auxRand = "C87AA53824B4D7AE2EB035A2B5BBBCCC080E76CDC6D1692C4B0B62D798E6D906";
+let signatures = [
+  Ecdsa.Signature.fromHex('0x'+bytesToHex(schnorr.sign(msg, privateKeys[0], auxRand))),
+  Ecdsa.Signature.fromHex('0x'+bytesToHex(schnorr.sign(msg, privateKeys[1], auxRand))),
+  Ecdsa.Signature.fromHex('0x'+bytesToHex(schnorr.sign(msg, privateKeys[2], auxRand))),
+];
 
 // e = int(hashBIP0340/challenge(bytes(r) || bytes(P) || m)) mod n.
-let e1 =
-  Gadgets.Field3.from(
-    93949542165706944001660866409936821093384992946842435162876695386345791128474n
-  );
-let e2 =
-  Gadgets.Field3.from(
-    70450778734895434334655249143454831359357261206085335765708021653002017907034n
-  );
+let messageHashes = [
+  Gadgets.Field3.from(schnorrGetE(schnorr.sign(msg, privateKeys[0], auxRand), msg, schnorr.getPublicKey(privateKeys[0]))),
+  Gadgets.Field3.from(schnorrGetE(schnorr.sign(msg, privateKeys[1], auxRand), msg, schnorr.getPublicKey(privateKeys[1]))),
+  Gadgets.Field3.from(schnorrGetE(schnorr.sign(msg, privateKeys[2], auxRand), msg, schnorr.getPublicKey(privateKeys[2]))),
+];
 
 let tree: MerkleTree<Field>;
 let merkleRoot: Field, merkleProof: MerkleProof, merkleIndex: Field, leafHash: Field, proof: any;
 
 let accountHashes = [
-  Poseidon.hash(Bytes.fromHex('000FFF').toFields()), // 0n
-  Poseidon.hash(publicKeyPoint1.x),
-  Poseidon.hash(publicKeyPoint2.x),
+  Poseidon.hash(publicKeyPoints[0].x), // 0n
+  Poseidon.hash(publicKeyPoints[1].x),
+  Poseidon.hash(publicKeyPoints[2].x),
 ];
 
 // off-chain persistence with levelDB
@@ -94,17 +99,17 @@ const cache: Cache = Cache.FileSystem('./cache');
 await verifyBIP340OwnershipMembershipProgram.compile({ cache });
 console.timeEnd('compile ZkProgram');
 
-console.log("TEST #1: verifying publicKey1 with right membership ...");
+console.log("TEST #1: verifying publicKey0 with right membership ...");
 
 merkleRoot = tree.getRoot();
-merkleProof = await tree.prove(1n);
-merkleIndex = Field(1n);
+merkleProof = await tree.prove(0n);
+merkleIndex = Field(0n);
 
 proof = await verifyBIP340OwnershipMembershipProgram.verifyBIP340OwnershipMembership(
   merkleRoot,
-  e1,
-  signature1,
-  publicKeyPoint1,
+  messageHashes[0],
+  signatures[0],
+  publicKeyPoints[0],
   merkleProof,
   merkleIndex
 );
@@ -113,17 +118,17 @@ proof.publicOutput.verifiedOwnership.assertTrue();
 proof.publicOutput.verifiedMembership.assertTrue();
 console.log("TEST #1 result should be true true:", proof.publicOutput.verifiedOwnership.toBoolean(), proof.publicOutput.verifiedMembership.toBoolean());
 
-console.log("TEST #2: verifying publicKey1 with wrong membership ...");
+console.log("TEST #2: verifying publicKey0 with wrong membership ...");
 
 merkleRoot = tree.getRoot();
-merkleProof = await tree.prove(2n);
-merkleIndex = Field(2n);
+merkleProof = await tree.prove(1n);
+merkleIndex = Field(1n);
 
 proof = await verifyBIP340OwnershipMembershipProgram.verifyBIP340OwnershipMembership(
   merkleRoot,
-  e1,
-  signature1,
-  publicKeyPoint1,
+  messageHashes[0],
+  signatures[0],
+  publicKeyPoints[0],
   merkleProof,
   merkleIndex
 );
@@ -132,17 +137,17 @@ proof.publicOutput.verifiedOwnership.assertTrue();
 proof.publicOutput.verifiedMembership.assertFalse();
 console.log("TEST #2 result should be true false:", proof.publicOutput.verifiedOwnership.toBoolean(), proof.publicOutput.verifiedMembership.toBoolean());
 
-console.log("TEST #3: verifying publicKey2 with right membership ...");
+console.log("TEST #3: verifying publicKey1 with right membership ...");
 
 merkleRoot = tree.getRoot();
-merkleProof = await tree.prove(2n);
-merkleIndex = Field(2n);
+merkleProof = await tree.prove(1n);
+merkleIndex = Field(1n);
 
 proof = await verifyBIP340OwnershipMembershipProgram.verifyBIP340OwnershipMembership(
   merkleRoot,
-  e2,
-  signature2,
-  publicKeyPoint2,
+  messageHashes[1],
+  signatures[1],
+  publicKeyPoints[1],
   merkleProof,
   merkleIndex
 );
@@ -160,9 +165,9 @@ merkleIndex = Field(1n);
 
 proof = await verifyBIP340OwnershipMembershipProgram.verifyBIP340OwnershipMembership(
   merkleRoot,
-  e1,
-  signature2,
-  publicKeyPoint1,
+  messageHashes[1],
+  signatures[2],
+  publicKeyPoints[1],
   merkleProof,
   merkleIndex
 );
