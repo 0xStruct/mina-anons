@@ -31,33 +31,35 @@ let privateKeys = [
   schnorr.utils.randomPrivateKey(),
 ];
 
+// publicKeyPoints are lift_x
 let publicKeyPoints = [
   Point.from({
     x: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[0]).px,
-    y: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[0]).py,
+    y: schnorr.utils.lift_x(secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[0]).px).py,
   }),
   Point.from({
     x: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[1]).px,
-    y: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[1]).py,
+    y: schnorr.utils.lift_x(secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[1]).px).py,
   }),
   Point.from({
     x: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[2]).px,
-    y: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[2]).py,
+    y: schnorr.utils.lift_x(secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[2]).px).py,
   }),
 ];
 
-let msg = "7E2D58D8B3BCDF1ABADEC7829054F90DDA9805AAB56C77333024B9D0A508B75C";
+let msg = "243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89";
+let auxRand = "C87AA53824B4D7AE2EB035A2B5BBBCCC080E76CDC6D1692C4B0B62D798E6D906";
 let signatures = [
-  Ecdsa.Signature.fromHex('0x'+bytesToHex(schnorr.sign(msg, privateKeys[0]))),
-  Ecdsa.Signature.fromHex('0x'+bytesToHex(schnorr.sign(msg, privateKeys[1]))),
-  Ecdsa.Signature.fromHex('0x'+bytesToHex(schnorr.sign(msg, privateKeys[2]))),
+  Ecdsa.Signature.fromHex('0x'+bytesToHex(schnorr.sign(msg, privateKeys[0], auxRand))),
+  Ecdsa.Signature.fromHex('0x'+bytesToHex(schnorr.sign(msg, privateKeys[1], auxRand))),
+  Ecdsa.Signature.fromHex('0x'+bytesToHex(schnorr.sign(msg, privateKeys[2], auxRand))),
 ];
 
 // e = int(hashBIP0340/challenge(bytes(r) || bytes(P) || m)) mod n.
 let messageHashes = [
-  Gadgets.Field3.from(schnorrGetE(schnorr.sign(msg, privateKeys[0]), msg, schnorr.getPublicKey(privateKeys[0]))),
-  Gadgets.Field3.from(schnorrGetE(schnorr.sign(msg, privateKeys[1]), msg, schnorr.getPublicKey(privateKeys[1]))),
-  Gadgets.Field3.from(schnorrGetE(schnorr.sign(msg, privateKeys[2]), msg, schnorr.getPublicKey(privateKeys[2]))),
+  Gadgets.Field3.from(schnorrGetE(schnorr.sign(msg, privateKeys[0], auxRand), msg, schnorr.getPublicKey(privateKeys[0]))),
+  Gadgets.Field3.from(schnorrGetE(schnorr.sign(msg, privateKeys[1], auxRand), msg, schnorr.getPublicKey(privateKeys[1]))),
+  Gadgets.Field3.from(schnorrGetE(schnorr.sign(msg, privateKeys[2], auxRand), msg, schnorr.getPublicKey(privateKeys[2]))),
 ];
 
 let tree: MerkleTree<Field>;

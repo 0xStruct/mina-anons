@@ -38,6 +38,7 @@ function verifyBIP340(
   // e = int(hashBIP0340/challenge(bytes(r) || bytes(P) || m)) mod n.
   let e = msgHash; // passing in already hashed messaged
 
+  // P passed should be already lift_x
   let eP = EllipticCurve.scale(e, publicKey, Curve); // e x P
 
   let R = EllipticCurve.add(sG, EllipticCurve.negate(eP, Curve), Curve); // R = s x G - e x P

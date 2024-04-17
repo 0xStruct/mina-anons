@@ -11,26 +11,24 @@ import { schnorrGetE } from './schnorrGetE.js';
 const Secp256k1 = Crypto.createCurve(Crypto.CurveParams.Secp256k1);
 
 let privateKeys = [
-  hexToBytes("B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEF"),
-  hexToBytes("C90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B14E5C9"),
-  hexToBytes("0B432B2677937381AEF05BB02A66ECD012773062CF3FA2549E44F58ED2401710"),
   schnorr.utils.randomPrivateKey(),
   schnorr.utils.randomPrivateKey(),
   schnorr.utils.randomPrivateKey(),
 ];
 
+// publicKeyPoints are lift_x
 let publicKeyPoints = [
   Point.from({
     x: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[0]).px,
-    y: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[0]).py,
+    y: schnorr.utils.lift_x(secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[0]).px).py,
   }),
   Point.from({
     x: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[1]).px,
-    y: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[1]).py,
+    y: schnorr.utils.lift_x(secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[1]).px).py,
   }),
   Point.from({
     x: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[2]).px,
-    y: secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[2]).py,
+    y: schnorr.utils.lift_x(secp256k1.ProjectivePoint.fromPrivateKey(privateKeys[2]).px).py,
   }),
 ];
 
