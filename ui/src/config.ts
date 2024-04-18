@@ -1,5 +1,8 @@
 import { privateKeyToAccount } from "viem/accounts";
 
+import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
+import { schnorr, secp256k1 } from '@noble/curves/secp256k1';
+
 // these a throw-away privateKeys, generated randomly
 export const PRIVATE_KEYS: `0x${string}`[] = [
   "0x23a6856c2506f416cd3d8c2383cd13550b497490265bafabec57917575637846",
@@ -16,4 +19,31 @@ export const ACCOUNTS = [
   privateKeyToAccount(PRIVATE_KEYS[2]),
   privateKeyToAccount(PRIVATE_KEYS[3]),
   privateKeyToAccount(PRIVATE_KEYS[4]),
+];
+
+export const BIP340_PRIVATE_KEYS = [
+  "B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEF",
+  "C90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B14E5C9",
+  "0B432B2677937381AEF05BB02A66ECD012773062CF3FA2549E44F58ED2401710",
+  "6f04344f9d64b3a5f84371aa708c1ad4b78a2e9fc28904b681cfefc504df9935",
+  "3bc2ebd3e9f61e8ce7c7c5ef0a9ed903181cb416493b929928ac3f1107f7f527",
+  // bytesToHex(schnorr.utils.randomPrivateKey()),
+];
+
+function generate_bip340_account(privateKeyHex: any) {
+  // let privateKey = schnorr.utils.randomPrivateKey();
+  // let privateKeyHex = bytesToHex(privateKey);
+
+  let publicKey = schnorr.getPublicKey(privateKeyHex);
+  let publicKeyHex = bytesToHex(publicKey);
+  let publicKeyPoint = schnorr.utils.lift_x(secp256k1.ProjectivePoint.fromPrivateKey(hexToBytes(privateKeyHex)).px);
+
+  return { privateKeyHex, publicKeyHex, publicKeyPoint, address: '0x'+ publicKeyHex };
+}
+export const BIP340_ACCOUNTS = [
+  generate_bip340_account(BIP340_PRIVATE_KEYS[0]),
+  generate_bip340_account(BIP340_PRIVATE_KEYS[1]),
+  generate_bip340_account(BIP340_PRIVATE_KEYS[2]),
+  generate_bip340_account(BIP340_PRIVATE_KEYS[3]),
+  generate_bip340_account(BIP340_PRIVATE_KEYS[4]),
 ];
