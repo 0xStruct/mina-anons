@@ -89,6 +89,10 @@ export default async function ingestor(req) {
 
     // Check if signature is valid
     try {
+      // @mina-anons
+      // body.address and body.sig is by oracle which signed and posted with vote proof
+      // so it should verfiy here, no need to change
+
       const isValidSig = await snapshot.utils.verify(body.address, body.sig, body.data, network, {
         broviderUrl
       });

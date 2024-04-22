@@ -60,3 +60,26 @@ _This is subjected to change as I am getting the first MVP working in a month_
 - UI integrations
 	- Tweak `votes list` component
 	- UI for generating `vote proof`
+
+### Current implementation explained
+
+- `slip_id` is a unique "anonymous" identifier for a voter issued by `snapshot-oracle`
+- from `/demo-snapshot` UI screen, snapshot vote proof can be generated through `snapshotVoteProof.ts` ZK Program.
+- the snapshot vote proof is archived on IPFS, a _vote by proxy_ with reference to the vote proof is signed and submitted by `snapshot-oracle`
+- 2 voting strategies, currently considered for, are `whitelist` and `ticket`
+
+```javascript
+	// account here is the account of the oracle
+	const receipt = await client.vote(web3, account, {
+		space: 'mina-anons.eth',
+		proposal: '0xfc255b04d5a5e9d39b8aa63694ccd20eed46eec651ae5c2332397f646312db5a',
+		type: 'single-choice',
+		choice: 1,
+		reason: 'Choice 1 make lot of sense',
+		app: 'mina-anons',
+		slip_id: '<slip_id>',
+		proof: '<proof_ipfs_cid>'
+	});
+```
+
+- the tweaked [`snapshot-sequencer`](snapshot-sequencer) can ingest the _vote by proxy_ and upon `verifying` and `saving`, voter's `slip_id` is used as a unique identifier

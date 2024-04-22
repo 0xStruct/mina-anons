@@ -47,6 +47,12 @@ export async function verify(body): Promise<any> {
       return Promise.reject('invalid choice');
   }
 
+  // @mina-anons
+  // body.address is that of oracle, instead use slip_id
+  // if (msg.payload.app === 'mina-anons') {
+  //   body.address = msg.playload.slip_id;
+  // }
+
   if (proposal.validation?.name && proposal.validation.name !== 'any') {
     try {
       const {
@@ -105,6 +111,13 @@ export async function verify(body): Promise<any> {
 
 export async function action(body, ipfs, receipt, id, context): Promise<void> {
   const msg = jsonParse(body.msg);
+
+  // @mina-anons
+  // body.address is that of oracle, instead use slip_id sneaked in through msg.metadata
+  // if (msg.payload.app === 'mina-anons') {
+  //   body.address = msg.payload.slip_id;
+  // }
+   
   const voter = body.address;
   const created = parseInt(msg.timestamp);
   const choice = JSON.stringify(msg.payload.choice);
