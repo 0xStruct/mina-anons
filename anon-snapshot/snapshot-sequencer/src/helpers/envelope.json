@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/Envelope",
+  "definitions": {
+    "Envelope": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string",
+          "format": "address"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "domain": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "version"
+              ]
+            },
+            "message": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "format": "address"
+                },
+                "timestamp": {
+                  "type": "number"
+                },
+                "space": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "from",
+                "timestamp"
+              ]
+            },
+            "types": {
+              "type": "object"
+            },
+            "primaryType": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "domain",
+            "message",
+            "types"
+          ],
+          "additionalProperties": false
+        },
+        "sig": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "address",
+        "data",
+        "sig"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
