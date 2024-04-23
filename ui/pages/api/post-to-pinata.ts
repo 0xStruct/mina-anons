@@ -10,7 +10,7 @@ export default async function handler(
 
   try {
     console.log("nextRequest.body", nextRequest.body);
-    
+
     const options = {
       method: "POST",
       headers: {

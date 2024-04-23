@@ -1,7 +1,7 @@
 // This is a module worker, so we can use imports (in the browser too!)
 import { recoverPublicKey } from "viem";
 
-// load o1js async 
+// load o1js async
 const loadForProof = async () => {
   const { Cache, Field, Gadgets, Poseidon, ZkProgram } = await import("o1js");
 
@@ -31,7 +31,7 @@ const loadForProof = async () => {
 
 addEventListener("message", async (e: any) => {
   postMessage({ message: "proof-worker-start" });
-  
+
   // load o1js and ZkProgram async
   const {
     Cache,
@@ -72,7 +72,7 @@ addEventListener("message", async (e: any) => {
   }); // use cache for faster compilation
 
   // const { verificationKey } = await verifyOwnershipMembershipProgram.compile();
-  postMessage({ message: "compile-zkprogram-done" });
+  postMessage({ message: "compiled-zkprogram-done" });
 
   console.log("verificationKey", verificationKey);
 
@@ -97,9 +97,18 @@ addEventListener("message", async (e: any) => {
     bytesOfXY
   );
 
-  console.log("proof done", proof.toJSON(), proof.publicOutput, verificationKey);
+  console.log(
+    "proof done",
+    proof.toJSON(),
+    proof.publicOutput,
+    verificationKey
+  );
 
-  postMessage({ message: "proof-done", proof: proof.toJSON(), verificationKey: verificationKey});
+  postMessage({
+    message: "proof-done",
+    proof: proof.toJSON(),
+    verificationKey: verificationKey,
+  });
 
   // not necessary to re-verify, just for reference
   // const ok = await verify(proof.toJSON(), verificationKey);

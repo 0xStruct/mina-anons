@@ -46,8 +46,8 @@ const snapshotVoteProofProgram = ZkProgram({
           .slice(12); // take only the last 20
 
         // check that slip_id is derived from ethAddress
-        Provable.log(slip_id, Poseidon.hash([Poseidon.hash(ethAddressFields), Field('344252421314465354353534534242')]));
-        slip_id.assertEquals(Poseidon.hash([Poseidon.hash(ethAddressFields), Field('344252421314465354353534534242')]));
+        Provable.log(slip_id, Poseidon.hash([Poseidon.hash(ethAddressFields), Field('1234567890')]));
+        slip_id.assertEquals(Poseidon.hash([Poseidon.hash(ethAddressFields), Field('1234567890')]));
 
         // assert to assure messageHashHash is equal to messageHashScalar which is used for verification
         // this is to ensure that message cannot be spoofed along with valid proof

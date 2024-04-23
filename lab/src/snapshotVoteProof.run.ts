@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import {
   snapshotVoteProofProgram,
   Secp256k1,
@@ -18,6 +17,9 @@ import {
 
 import { hashMessage, recoverPublicKey } from 'viem';
 import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
+
+const ORACLE_PRIVATE_KEY='EKFNH6n2SDHMv3SqX9BQoN6YUw43mCpqwUxo2Lx3B5WCLyxCHKtd';
+const ORACLE_SECRET='1234567890';
 
 // create accounts with viem
 let accounts = [
@@ -75,13 +77,12 @@ let msgHashHash = Poseidon.hash(msgHashScalar.toFields());
 // let slip_id = Field("25029458601869810033071111685846709248060560390983246472539975473834231578977");
 const slip_id = Poseidon.hash([
   Poseidon.hash(ethAddressFields),
-  Field(process.env.ORACLE_SECRET!),
+  Field(ORACLE_SECRET),
   // Field(BigInt(hashMessage(space+'/proposal/'+proposal)))
 ]);
 
-// let oracle_signature = Signature.fromBase58("7mX74P1QUtrMGrbdigNhHAzG4r3q79hnwWXRDoTbehTR9vzfTs2wVawtfraAZkvgjWtGP9qCYBN3zygrHAe4w7pssPgN5GJQ");
 const oracle_privateKey = PrivateKey.fromBase58(
-  process.env.ORACLE_PRIVATE_KEY!
+  ORACLE_PRIVATE_KEY
 );
 const oracle_signature = Signature.create(oracle_privateKey, [slip_id]);
 
