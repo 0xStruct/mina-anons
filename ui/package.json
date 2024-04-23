@@ -6,14 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@tanstack/react-query": "5.0.5",
     "comlink": "^4.4.1",
     "level": "^8.0.1",
     "next": "^13.5.2",
-    "o1js": "^0.17.0",
+    "o1js": "0.17.0",
+    "patch-package": "^8.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "viem": "latest",
