@@ -234,7 +234,7 @@ function App() {
                 </span>
               </div>
               <div className="chat-footer opacity-30 text-xs">
-                Mock wallet of Index #{accountIndex}
+                Mock ETH wallet of Index #{accountIndex}
               </div>
             </div>
           </div>
@@ -283,7 +283,7 @@ function App() {
       </ul>
 
       <div className="w-full grid place-items-center">
-        <div>Mina 🤝 Snapshot.org</div>
+        <div className="text-2xl">Mina 🤝 Snapshot.org</div>
         <div className="text-xs text-blue-200 italic mt-1">Private voting for Snapshot.org</div>
       </div>
 
@@ -293,28 +293,30 @@ function App() {
             <div role="alert" className="alert alert-info text-xs">
               <span>💡 Make a vote choice then sign to vote anonymously.</span>
             </div>
-            <div className="form-control w-8/12">
-              <div className="mt-2 mb-2">🗳️ Voting for... <a className="text-secondary" href="https://testnet.snapshot.org/#/mina-anons.eth/proposal/0xfc255b04d5a5e9d39b8aa63694ccd20eed46eec651ae5c2332397f646312db5a" target="_blank">Proposal #1</a></div>
+            <div className="form-control w-8/12 m-4 px-8">
+              <div className="mt-2 mb-2">🗳️ Voting for... <a className="text-secondary" href="https://testnet.snapshot.org/#/mina-anons.eth/proposal/0xfc255b04d5a5e9d39b8aa63694ccd20eed46eec651ae5c2332397f646312db5a" target="_blank">Proposal #1</a> hosted on Snapshot.org</div>
               <div className="mt-2 text-xs">Make a vote choice</div>
 
-              <div className="mt-2">
-                <input
-                  type="radio"
-                  name="vote"
-                  value="YES"
-                  onChange={() => setVote("YES")}
-                />
-                <span className="ml-4">YES</span>
-              </div>
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                <div className="p-4 hover:bg-slate-100 hover:text-black">
+                  <input
+                    type="radio"
+                    name="vote"
+                    value="YES"
+                    onChange={() => setVote("YES")}
+                  />
+                  <span className="ml-4">YES</span>
+                </div>
 
-              <div className="mt-2">
-                <input
-                  type="radio"
-                  name="vote"
-                  value="NO"
-                  onChange={() => setVote("NO")}
-                />
-                <span className="ml-4">NO</span>
+                <div className="p-4 hover:bg-slate-100 hover:text-black">
+                  <input
+                    type="radio"
+                    name="vote"
+                    value="NO"
+                    onChange={() => setVote("NO")}
+                  />
+                  <span className="ml-4">NO</span>
+                </div>
               </div>
             </div>
             <button

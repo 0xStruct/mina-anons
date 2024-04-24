@@ -26,7 +26,7 @@ function App() {
       <div className="container p-10 grid justify-items-center">
         <h1 className="text-5xl font-bold font-serif mb-4">Hello Anon!</h1>
         <p className="py-2 text-sm">
-          Privacy is your right! Mina brings privacy to Ethereum.
+          Privacy is your right! Mina brings privacy to Ethereum, Bitcoin and beyond.
         </p>
         <p className="py-2 text-sm">It is as simple as 1, 2, 3!</p>
         <ul className="steps my-8 px-10 w-full">
@@ -54,17 +54,28 @@ function App() {
         </Link>
       </div>
 
-      <div className="mt-10 w-full grid justify-items-center text-gray-500">
-        <div className="text-sm">screens:</div>
+      <div className="mt-2 w-full grid justify-items-center text-gray-500">
+      <div className="text-sm">demo screens:</div>
         <div>
-        <a className="btn btn-neutral btn-sm" href="/demo">
-            Demo
+          <a className="btn btn-neutral btn-sm" href="/demo">
+            Demo <span className="text-xs italic font-light">Ethereum</span>
           </a>{" "}
           |{" "}
           <a className="btn btn-neutral btn-sm" href="/demo-wagmi">
-            Demo w/ WAGMI
+            Demo <span className="text-xs italic font-light">Wagmi</span>
           </a>{" "}
           |{" "}
+          <a className="btn btn-neutral btn-sm" href="/demo-nostr">
+            Demo <span className="text-xs italic font-light">BIP340/Nostr</span>
+          </a>{" "}
+          |{" "}
+          <a className="btn btn-neutral btn-sm" href="/demo-snapshot">
+            Demo <span className="text-xs italic font-light">Snapshot.org</span>
+          </a>
+        </div>
+        <br />
+        <div className="text-sm">other screens:</div>
+        <div>
           <a className="btn btn-neutral btn-sm" href="/curate">
             Curate
           </a>{" "}

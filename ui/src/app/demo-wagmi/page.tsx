@@ -255,6 +255,12 @@ function App() {
           Post
         </li>
       </ul>
+
+      <div className="w-full grid place-items-center">
+        <div className="text-2xl">Mina 🤝 Ethereum</div>
+        <div className="text-xs text-blue-200 italic mt-1">Private proofs for Ethereum accounts</div>
+      </div>
+      
       <div className="p-4 grid place-items-center">
         {step === 1 && (
           <>

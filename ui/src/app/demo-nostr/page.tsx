@@ -224,6 +224,11 @@ function App() {
         </li>
       </ul>
 
+      <div className="w-full grid place-items-center">
+        <div className="text-2xl">Mina 🤝 Bitcoin BIP340</div>
+        <div className="text-xs text-blue-200 italic mt-1">Private proofs for Bitcoin/Nostr accounts</div>
+      </div>
+
       <div className="p-4 grid place-items-center">
         {step === 1 && (
           <>
@@ -265,7 +270,7 @@ function App() {
           <>
             <div role="alert" className="alert alert-info text-xs mb-4">
               <span>
-                ✅ Signature, hence publicKey, is now ready.
+                ✅ Signature (Schnorr) is now ready.
                 <br />
                 ✅ For demo purpose, all 5 mock addresses are put in the merkleTree
                 <br />
@@ -337,8 +342,8 @@ function App() {
               <span>
                 ✅ Proof is posted successfully to decentralized web as JSON on
                 IPFS
-                <br />✅ It will be curated and posted to X as an anonymous post
-                with proof
+                <br />
+                ✅ It will be posted to Nostr as an anonymous post with proof
               </span>
             </div>
             <div role="alert" className="alert alert-success text-xs mb-4">
