@@ -4,7 +4,7 @@ Mina-anons is a zero-knowledge social layer which provides privacy and decentral
 
 The project will explores the theme of bringing Mina ZK power to other blockchains and dApps
 
-`Mina x Ethereum`, `Mina x Bitcoin` , `Mina x Snapshot` , etc
+`Mina x Ethereum`, `Mina x Bitcoin` , `Mina x Snapshot.org` , etc
 
 Demo sites: https://mina-anons.up.railway.app/ | https://mina-anons.vercel.app/
 
@@ -15,11 +15,15 @@ Demo sites: https://mina-anons.up.railway.app/ | https://mina-anons.vercel.app/
 It enables an ethereum address to prove its ownership and membership of a specific club anonymously ...
 then post an anonymous message.
 
-- 🎥: https://youtu.be/xOmbYQm6URs `/`
-- 🎥: https://youtu.be/jGe26i2kJuU `/demo`
-- 🎥: https://youtu.be/5Be_A7OnZi0 `/demo-wagmi`
+- 🎥: https://youtu.be/xOmbYQm6URs [`/`](https://mina-anons.up.railway.app)
+- 🎥: https://youtu.be/jGe26i2kJuU [`/demo`](https://mina-anons.up.railway.app/demo)
+- 🎥: https://youtu.be/5Be_A7OnZi0 [`/demo-wagmi`](https://mina-anons.up.railway.app/demo-wagmi)
+- 🎥: TBC [`/demo-nostr`](https://mina-anons.up.railway.app/demo-nostr)
+- 🎥: TBC [`/demo-snapshot`](https://mina-anons.up.railway.app/demo-snapshot)
+
+
 - 🎥: https://youtu.be/Nsl6ym2ZawQ `/curate`
-- 🎥: https://youtu.be/YsZkgOV2w0k `/club-mambo-5`
+- 🎥: https://youtu.be/YsZkgOV2w0k `/club/mambo-5`
 
 _Please refer to the folder for detailed info in its [README.md](ui/README.md)_
 
@@ -33,11 +37,17 @@ Pinata service is used for IPFS pinning.
 
 Sample X/tweet: https://bit.ly/mina-anons-x
 
+Nostr post: TBC
+
 ## Mina-anons: 🔬 LAB
 
-[🔬 LAB](lab) is a playground to experiment with ECDSA support and beyond
+[🔬 LAB](lab) is a playground to experiment with ECDSA support, tying in with Ethereum account address.
 
-ownership or/and membership proofs can now be made by an ethereum address
+Work has been done to add BIP340 support to integrate with Bitcoin ecosystem.
+
+Other account verification such as OAuth/JWT will be explored to add support for web2 platforms as well.
+
+ownership or/and membership proofs can now be made by ethereum addresses and bitcoin/nostr addresses
 
 🎥 https://youtu.be/_iXCUi2q5-8 (tests and runs)
 
@@ -50,7 +60,19 @@ A widely popular voting platform for DAOs used by millions of DAO members
 
 It is used by Aave, ENS, ApeCoin, Starknet, Lido, Safe etc
 
-With this project, the objective is to prove how Mina could integrate into existing platforms seamlessly.
+With this project, the objective is to showcase that Mina could integrate into existing platforms seamlessly.
+
+## README files
+
+Documentation is important, this README file is not the only one in this project.
+
+Below, there are more README files in relevant sub-folders.
+
+- [`lab/README.md`](lab/README.md)
+- [`lab/BIP340.README.md`](lab/BIP340.README.md)
+- [`ui/README.md`](ui/README.md)
+- [`anon-snapshot/snapshot-oracle/README.md`](anon-snapshot/snapshot-oracle/README.md)
+- [`anon-snapshot/snapshot-sequencer/README.md`](anon-snapshot/snapshot-sequencer/README.md)
 
 ## Thoughts
 

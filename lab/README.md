@@ -64,6 +64,20 @@ npm run build
 node build/src/ownership-membership.run.js
 ```
 
+### BIP340 Schorr support
+
+More details on BIP340 support is documented in this [`BIP340.README.md`](BIP340.README.md)
+
+The main file to refere is [`src/bip340Verify.ts`](src/bip340Verify.ts)
+
+### vote proof for Snapshot.org
+
+More details on integration with Snapshot.org is documented in this [`anon-snapshot/README.md`](../anon-snapshot/README.md)
+
+Please refer to _current implementation_ part
+
+In essence, `slip_id` a unique identifier to mask a voter address is issued by the oracle and it is used in proof to do _vote by proxy_ ingested by Snapshot.org
+
 ## Run tests
 check out `.test.ts` files
 
@@ -71,6 +85,22 @@ check out `.test.ts` files
 npm install
 npm run build
 npm run test
+```
+
+## Run `.run.ts` files
+check out `.run.ts` files especially for BIP340 cases.
+
+`.run.ts` files are basically tests. `.test.ts` files will be added shortly.
+
+```sh
+npm install
+npm run build
+
+node build/src/bip340Verify.run.js
+node build/src/ownership.bip340.run.js
+node build/src/membership.bip340.run.js
+node build/src/ownership-membership.bip340.run.js
+node build/src/snapshotVoteProof.run.js
 ```
 
 ## References and tools

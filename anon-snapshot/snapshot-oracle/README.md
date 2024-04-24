@@ -9,7 +9,8 @@ This signed output can then be verified and used anonymously in ZkProgram as a p
 
 First setup, `.env.local` by `cp .env.local.example .env.local`
 
-- `PRIVATE_KEY` for the oracle to join with
+- `ORACLE_PRIVATE_KEY` for the oracle to sign
+- `ORACLE_SECRET` numberical string used for generating `slip_id` hash
 - `SNAPSHOT_API_KEY` an optional API key for higher rate limits
 
 ```shell
@@ -25,6 +26,10 @@ npm run start:nodemon
 ```
 
 ## API Endpoints
+
+[GET] `/slip?space=[space]&proposal=[proposalHex]&signature=[signatureHex]
+
+i.e: `/slip?space=mina-anons.eth&proposal=0xdc255b04d5a5e9d39b8aa63694ccd20eed46eec651ae5c2332397f646312db5a&signature=0xa08344ebff0ab8ec7137f51b8d900060bbc17845ebff780a01f0e54cbe01309f3196f6797b96611eeeb328e4849bf347170248df2b24f4ebd12be6f4e3c8be3b1c`
 
 [GET] `/vp?address=[address]&space=[space]&snapshot=[snapshot]`
 
