@@ -76,8 +76,12 @@ function App() {
         <br />
         <div className="text-sm">other screens:</div>
         <div>
+          <a className="btn btn-neutral btn-sm" href="/curate-nostr">
+            Curate <span className="text-xs italic font-light">to Nostr</span>
+          </a>{" "}
+          |{" "}
           <a className="btn btn-neutral btn-sm" href="/curate">
-            Curate
+            Curate <span className="text-xs italic font-light">to X</span>
           </a>{" "}
           |{" "}
           <a className="btn btn-neutral btn-sm" href="/club/mambo-5">

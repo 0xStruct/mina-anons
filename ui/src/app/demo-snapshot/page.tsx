@@ -188,7 +188,7 @@ function App() {
       proof: proof.proof,
       verificationKey: {
         data: proof.verificationKey.data,
-        hash: String(proof.verificationKey.hash.value[1][1]),
+        hash: "hash", // String(proof.verificationKey.hash.value[1][1]),
       },
     };
 

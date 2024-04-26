@@ -14,12 +14,14 @@
     "comlink": "^4.4.1",
     "level": "^8.0.1",
     "next": "^13.5.2",
+    "nostr-tools": "^2.5.1",
     "o1js": "0.17.0",
     "patch-package": "^8.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "viem": "latest",
-    "wagmi": "latest"
+    "wagmi": "latest",
+    "ws": "^8.17.0"
   },
   "devDependencies": {
     "@types/node": "^20.7.2",
