@@ -81,6 +81,8 @@ In essence, `slip_id` a unique identifier to mask a voter address is issued by t
 ## Run tests
 check out `.test.ts` files
 
+🎥 running `.test.ts` files: : https://youtu.be/_iXCUi2q5-8
+
 ```sh
 npm install
 npm run build
@@ -89,6 +91,8 @@ npm run test
 
 ## Run `.run.ts` files
 check out `.run.ts` files especially for BIP340 cases.
+
+🎥 running `.run.ts` files: https://youtu.be/E9_M-hKh_2o
 
 `.run.ts` files are basically tests. `.test.ts` files will be added shortly.
 

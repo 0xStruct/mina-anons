@@ -18,8 +18,8 @@ then post an anonymous message.
 - 🎥: https://youtu.be/xOmbYQm6URs [`/`](https://mina-anons.up.railway.app)
 - 🎥: https://youtu.be/jGe26i2kJuU [`/demo`](https://mina-anons.up.railway.app/demo)
 - 🎥: https://youtu.be/5Be_A7OnZi0 [`/demo-wagmi`](https://mina-anons.up.railway.app/demo-wagmi)
-- 🎥: TBC [`/demo-nostr`](https://mina-anons.up.railway.app/demo-nostr)
-- 🎥: TBC [`/demo-snapshot`](https://mina-anons.up.railway.app/demo-snapshot)
+- 🎥: https://youtu.be/rS4H_iSFqWU [`/demo-nostr`](https://mina-anons.up.railway.app/demo-nostr)
+- 🎥: https://youtu.be/nFIGTrRz-o4 [`/demo-snapshot`](https://mina-anons.up.railway.app/demo-snapshot)
 
 
 - 🎥: https://youtu.be/Nsl6ym2ZawQ `/curate`
@@ -37,7 +37,7 @@ Pinata service is used for IPFS pinning.
 
 Sample X/tweet: https://bit.ly/mina-anons-x
 
-Nostr post: TBC
+Sample Nostr post: https://nostter.app/nevent1qqsfha66uaw94ds9tzd53wmaf70v4dpsufdvd97s3rgn0zmh8wptxgsz84rs0
 
 ## Mina-anons: 🔬 LAB
 

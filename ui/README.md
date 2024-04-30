@@ -52,7 +52,7 @@ _to eventually post anonymously to Twitter/X_
 
 ### demo BIP340/Nostr page `/demo-nostr`
 
-🎥: TBC
+🎥: https://youtu.be/rS4H_iSFqWU
 
 this demo is preloaded with 5 bitcoin wallets to test with,
 and guides user through 3 steps (sign, prove, post)
@@ -61,7 +61,7 @@ _to eventually post anonymously to Nostr_
 
 ### demo Snapshot.org page `/demo-snapshot`
 
-🎥: TBC
+🎥: https://youtu.be/nFIGTrRz-o4
 
 this demo is preloaded with 5 ethereum wallets to test with,
 and guides user through 3 steps (sign, prove, post)
